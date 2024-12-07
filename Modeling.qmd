@@ -1,0 +1,161 @@
+---
+title: "Modeling"
+format: html
+editor: visual
+---
+
+## Train and Test Split
+
+```{r}
+library(tidymodels)
+set.seed(558)
+
+diabetes_final <- readRDS(file = "diabetes_final.rds")
+
+diabetes_final <- diabetes_final |> slice_sample(n = 5000)
+
+
+data_split <- initial_split(diabetes_final, prop = 0.70)
+train_diabetes<- training(data_split)
+test_diabetes <- testing(data_split)
+
+
+cv_folds <- vfold_cv(train_diabetes, v = 5)
+```
+
+
+## Classification Tree
+
+```{r}
+tree_rec <- recipe(Diabetes_binary ~ ., data = train_diabetes) |>
+  step_dummy(AnyHealthcare, NoDocbcCost, GenHlth, MentHlth, PhysHlth, Sex, Age, Education, Income)
+tree_rec
+
+
+tree_mod <- decision_tree(tree_depth = tune(),
+                          min_n = 500,
+                          cost_complexity = tune()) |>
+  set_engine("rpart") |>
+  set_mode("classification")
+
+#tree_grid <- tibble(
+#  cost_complexity = c(0.01, 0.1),
+#  tree_depth = c(5, 10)
+#)
+
+tree_grid <- grid_regular(cost_complexity(), tree_depth(), levels = 5)
+
+#tree_grid <- expand.grid(
+#  cost_complexity = c(0.00001, 0.0001, 0.001, 0.01, 0.1),
+#  tree_depth = c(1, 3, 5, 7, 10)
+#)
+
+tree_wkf <- workflow() |>
+  add_recipe(tree_rec) |>
+  add_model(tree_mod)
+
+tree_fits <- tree_wkf |> 
+  tune_grid(resamples = cv_folds,
+            grid = tree_grid,metrics = metric_set(mn_log_loss))
+
+tree_fits |>
+  collect_metrics()
+
+
+tree_fits |>
+  collect_metrics() |>
+  filter(.metric == "mn_log_loss") |>
+  arrange(mean)
+
+tree_best_params <- select_best(tree_fits, metric= "mn_log_loss")
+tree_best_params
+
+#finalize model on training set
+tree_final_wkf <- tree_wkf |>
+  finalize_workflow(tree_best_params)
+
+
+tree_final_fit <- tree_final_wkf |>
+  last_fit(data_split, metrics = metric_set(mn_log_loss))
+
+tree_final_fit |>
+  collect_metrics()
+
+tree_final_fit |>
+  extract_workflow() |>
+  extract_fit_engine() |>
+  rpart.plot::rpart.plot(roundint = FALSE, type = 2, extra = 104)
+```
+
+
+
+```{r}
+rf_spec <- rand_forest(
+  mtry = tune(),
+  min_n = 500,
+  trees = 200
+) |>
+ set_engine("ranger", importance = "impurity") |>
+ set_mode("classification")
+
+rf_wkf <- workflow() |>
+ add_recipe(tree_rec) |>
+ add_model(rf_spec)
+```
+
+
+```{r}
+rf_grid <- grid_regular(
+  mtry(range = c(5, 13)),
+  levels = 5
+)
+
+rf_fit <- rf_wkf |>
+  tune_grid(
+    resamples = cv_folds,
+    grid = rf_grid,
+    metrics = metric_set(mn_log_loss)
+  )
+```
+
+```{r}
+rf_fit |>
+ collect_metrics() |>
+ filter(.metric == "mn_log_loss") |>
+ arrange(mean)
+```
+
+```{r}
+rf_best_params <- select_best(rf_fit, metric = "mn_log_loss")
+rf_best_params
+```
+
+```{r}
+rf_final_wkf <- rf_wkf |>
+ finalize_workflow(rf_best_params)
+
+rf_final_fit <- rf_final_wkf |>
+ last_fit(data_split, metrics = metric_set(mn_log_loss))
+
+rf_final_fit |>
+  collect_metrics()
+```
+
+```{r}
+rf_full_fit <- rf_final_wkf |>
+ fit(diabetes_final)
+
+rf_final_model <- extract_fit_engine(rf_full_fit)
+
+rf_imp <- tibble(term = names(importance(rf_final_model)),value = importance(rf_final_model)) |> arrange(desc(value))
+rf_imp
+```
+
+```{r}
+rf_imp |>
+ mutate(term = factor(term, levels = term)) |>
+ ggplot(aes(x = term, y = value)) +
+ geom_bar(stat ="identity") +
+ coord_flip()
+```
+

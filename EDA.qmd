@@ -1,0 +1,124 @@
+---
+title: "EDA"
+format: html
+editor: visual
+---
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+diabetes <- read.csv("diabetes_binary_health_indicators_BRFSS2015.csv")
+```
+
+## Introduction
+
+-   briefly describe the data and variables we have to work with (in particular, the ones i will be prioritizing)
+
+### All Variables and Levels
+
+https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset
+https://www.cdc.gov/brfss/annual_data/2015/pdf/codebook15_llcp.pdf
+
+Diabetes_binary: 0 if no diabetes, 1 if diabetes
+
+HighBP: 0 if not High Blood Pressure, 1 if High Blood Pressure
+HighChol: 0 if low, 1 if high
+CholCheck: 0 if not checked in 5 years, 1 if checked in 5 years
+Smoker: 0 if not smoked 5 packs of cigarettes, 1 if yes
+Stroke: 0 if no stroke, 1 if yes stroke
+HeartDiseaseorAttack: 0 if no heart disease/attack, 1 if yes 
+PhysActivity: 0 if no physical activity in last month, 1 if yes
+Fruits: 0 if no daily fruit, 1 if daily fruit
+Veggies: 0 if no daily vegetables, 1 if daily vegetables
+HvyAlcoholConsump: 0 if not heavy drinker, 1 if heavy drinker (>14 drinks men, >7 women)
+AnyHealthcare: 0 if no healthcare, 1 if healthcare
+NoDocbcCost: 0 if not cost-restricted for doctors, 1 if yes
+DiffWalk: 0 if no difficulty walking, 1 if yes
+Sex: 0 if female, 1 if male
+
+GenHlth: 1-5 scale of overall health, 1 is excellent 5 is poor
+MentHlth: 1-30 scale of days with bad mental health.
+PhysHlth: 1-30 scale of days with bad physical health.
+Age:
+Education:
+Income:
+
+BMI: numerical variable of bmi
+
+
+-   what is the purpose of my eda and the goal with modeling
+
+## Exploratory Data Analysis
+
+### Validating the Data
+
+In terms of exploratory data analysis, I always like to take the first step of exploring missing values:
+
+```{r}
+(sum(is.na(diabetes)))
+```
+Great! It looks like there are none. I think a natural next step would be to investigate all of the variables individually, and make sure their names are legible and their values are logical.
+
+```{r}
+as_tibble(diabetes, width = Inf)
+```
+Based on the given variable descriptions above, I believe that the variable names are rather sensical. However, it looks like the data was read in as entirely double and not as factors. Let's fix that first for the binary variables. Since the binary variables take values 0 for no and 1 for yes, I figure we can just leave them as is. Sex is assigned to female or male respectively.
+
+
+```{r}
+diabetes <- diabetes |>
+  mutate(across(c(1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 18), as.factor)) |>
+  mutate(Sex = factor(Sex, levels = c(0,1), labels = c("Female", "Male")))
+str(diabetes)
+```
+
+Similarly, we have other factors with multiple levels that need to be named and ordered. The names could matter later in analysis, and the same thing for the ordering.
+
+For PhysHlth and MntlHlth, there were a few considerations. Treating this as a numerical variable possibly loses information between 0 days and 1 day. Furthermore, I wanted to account those who are in pain all of the time. That is why I have decided to transform the levels into 0 = "No Pain", 1 = "Some Pain", and 2 = "Everyday Pain".
+
+For the other variables, they are assigned with the labels provided in 
+
+```{r}
+diabetes <- diabetes |> 
+  mutate(GenHlth = factor(GenHlth, levels = c(1, 2, 3, 4, 5), labels = c("Excellent", "Very Good", "Good", "Fair", "Poor"), ordered = TRUE)) |>
+  mutate(MentHlth = case_when(
+    MentHlth == 0 ~ 0,
+    MentHlth >= 1 & MentHlth <= 29 ~ 1,
+    MentHlth == 30 ~ 2
+  )) |>
+  mutate(MentHlth = factor(MentHlth,levels = c(0, 1, 2), labels = c("No Pain", "Some Pain", "Everyday Pain"),ordered = TRUE)) |>
+mutate(PhysHlth = case_when(
+    PhysHlth == 0 ~ 0,
+    PhysHlth >= 1 & PhysHlth <= 29 ~ 1,
+    PhysHlth == 30 ~ 2
+  )) |>
+  mutate(PhysHlth = factor(PhysHlth,levels = c(0, 1, 2), labels = c("No Pain", "Pain", "Everyday Pain"),ordered = TRUE)) |>
+  mutate(Age = factor(Age,levels = c(1:13), labels = c("18-24","25-29","30-34","35-39","40-44","45-49","50-54","55-59","60-64","65-69","70-74","75-79","80-99"),ordered = TRUE)) |>
+  mutate(Education = factor(Education,levels = c(1:6), labels = c("NoSchool","Elementary","Some high school","High school graduate","Some college or technical school","College graduate"),ordered = TRUE)) |>
+  mutate(Income = factor(Income,levels = c(1:8), labels = c("<$10,000","$10,000-$14,999","$15,000-$19,999","$20,000-$24,999","$25,000 - $34,999","$35,000 - $49,999","$50,000 - $74,999",">=$75,000"),ordered = TRUE))
+```
+Now, ALL of the data should be correctly formatted and validated!
+
+```{r}
+str(diabetes)
+```
+
+### Determining an Objective
+
+Now that all of the data is correctly validated, we can determine which variables we are interested in looking at. I tend to like looking at more unexpected, or indirect routes to find relationships I wouldn't obviously expect. I believe that diet and the byproducts of a poor one will lead to a higher probability of diabetes. I'll approach this from a socioeconomic standpoint instead, plus a few extra variables that I am curious about.
+
+Variables of interest:
+Fruits, Veggies, AnyHealthCare, NoDocbcCost, GenHlth, MentHlth, PhysHlth, Sex, Age, Education, Income
+
+```{r}
+diabetes_final <- diabetes |>
+  select(c(Diabetes_binary, AnyHealthcare, NoDocbcCost, GenHlth, MentHlth, PhysHlth, Sex, Age, Education, Income))
+```
+This means we have no numeric variables. I figure that, instead of looking at 12 different table() calls, it may be helpful to see barcharts.
+
+
+```{r}
+saveRDS(diabetes_final, file = "diabetes_final.rds")
+```
+
+
+[Click here for the Modeling Page](Modeling.html)

@@ -265,7 +265,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="determining-an-objective" class="level3">
 <h3 class="anchored" data-anchor-id="determining-an-objective">Determining an Objective</h3>
-<p>Now that all of the data is correctly validated, we can determine which variables we are interested in looking at.</p>
+<p>Now that all of the data is correctly validated, we can determine which variables we are interested in looking at. I tend to like looking at more unexpected, or indirect routes to find relationships I wouldn’t obviously expect. I believe that diet and the byproducts of a poor one will lead to a higher probability of diabetes. I’ll approach this from a socioeconomic standpoint instead, plus a few extra variables that I am curious about.</p>
+<p>Variables of interest: Fruits, Veggies, AnyHealthCare, NoDocbcCost, GenHlth, MentHlth, PhysHlth, Sex, Age, Education, Income</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>diabetes_final <span class="ot">&lt;-</span> diabetes <span class="sc">|&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">c</span>(Diabetes_binary, AnyHealthcare, NoDocbcCost, GenHlth, MentHlth, PhysHlth, Sex, Age, Education, Income))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This means we have no numeric variables. I figure that, instead of looking at 12 different table() calls, it may be helpful to see barcharts.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(diabetes_final, <span class="at">file =</span> <span class="st">"diabetes_final.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p><a href="Modeling.html">Click here for the Modeling Page</a></p>
 
 
