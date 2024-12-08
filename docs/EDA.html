@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Robbie Ferrand">
 
-<title>EDA</title>
+<title>EDA(Exploratory Data Analysis)</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -95,26 +96,51 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </head>
 
-<body class="fullcontent">
+<body>
 
 <div id="quarto-search-results"></div>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#variables-used-in-this-project" id="toc-variables-used-in-this-project" class="nav-link" data-scroll-target="#variables-used-in-this-project">Variables Used in this Project</a></li>
+  </ul></li>
+  <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis">Exploratory Data Analysis</a>
+  <ul class="collapse">
+  <li><a href="#missing-values" id="toc-missing-values" class="nav-link" data-scroll-target="#missing-values">Missing Values</a></li>
+  <li><a href="#variable-names" id="toc-variable-names" class="nav-link" data-scroll-target="#variable-names">Variable Names</a></li>
+  <li><a href="#changing-data-to-factors" id="toc-changing-data-to-factors" class="nav-link" data-scroll-target="#changing-data-to-factors">Changing Data to Factors</a></li>
+  <li><a href="#determining-an-objective" id="toc-determining-an-objective" class="nav-link" data-scroll-target="#determining-an-objective">Determining an Objective</a></li>
+  <li><a href="#distributions-and-frequency" id="toc-distributions-and-frequency" class="nav-link" data-scroll-target="#distributions-and-frequency">Distributions and Frequency</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">EDA</h1>
+<h1 class="title">EDA(Exploratory Data Analysis)</h1>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Robbie Ferrand </p>
+          </div>
+  </div>
     
   
     
@@ -125,37 +151,67 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>diabetes <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"diabetes_binary_health_indicators_BRFSS2015.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cowplot)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(scales)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>diabetes <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"diabetes_binary_health_indicators_BRFSS2015.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Hello! Welcome to My (Robbie’s) Final Project for ST558. The purpose of this project is to explore a <a href="https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset">diabetes dataset, from Kaggle.</a> The dataset also has <a href="https://www.cdc.gov/brfss/annual_data/2015/pdf/codebook15_llcp.pdf">a codebook, which can be found here</a>.</p>
+<p>This page takes the user through exploratory data analysis of the diabetes dataset, including data validation, distribution analysis, and determining an overall objective for the <a href="Modeling.html">Modeling Page</a>.</p>
+<section id="variables-used-in-this-project" class="level3">
+<h3 class="anchored" data-anchor-id="variables-used-in-this-project">Variables Used in this Project</h3>
+<p>All of the variables can be found at the links above. Throughout the project, the creator decided to change objectives a few times, but the main objective was investigating relevant categorical variables of interest. Note that the creator has decided to exclude the BMI variable, which is the only numerical variable available.</p>
+<section id="response-variable" class="level4">
+<h4 class="anchored" data-anchor-id="response-variable">Response variable:</h4>
+<p><strong>Diabetes_binary:</strong> 0 if no diabetes, 1 if diabetes</p>
+<p>This is our variable of interest. We wish to see if we can predict if an individual has diabetes based on predictor variables.</p>
+</section>
+<section id="predictor-variables" class="level4">
+<h4 class="anchored" data-anchor-id="predictor-variables">Predictor variables:</h4>
 <ul>
-<li>briefly describe the data and variables we have to work with (in particular, the ones i will be prioritizing)</li>
+<li><p><strong>HighBP(0,1):</strong> 0 if individual does not have high blood pressure, 1 if individual does have high blood pressure</p></li>
+<li><p><strong>HighChol(0,1):</strong> 0 if individual does not have high cholesterol, 1 if individual does have high cholesterol</p></li>
+<li><p><strong>Fruits(0,1):</strong> 0 if individual does not consume fruit daily, 1 if individual does consume fruit daily</p></li>
+<li><p><strong>DiffWalk(0,1):</strong> 0 if individual does not have trouble walking, 1 if individual does have difficulty walking</p></li>
+<li><p><strong>Smoker:</strong> 0 if individual has not smoked 5 packs of cigarettes (100 cigarettes) in their lifetime, 1 if individual has smoked 5 packs of cigarettes (100 cigarettes) in their lifetime</p></li>
+<li><p><strong>CholCheck(0,1):</strong> 0 if individual has not had their cholesterol levels checked in the last 5 years, 1 if individual has had their cholesterol levels checked in the last 5 years</p></li>
+<li><p><strong>HeartDiseaseorAttack(0,1):</strong> 0 if individual does not have heart disease AND has not had a heart attack, 1 if individual has had either one or both</p></li>
+<li><p><strong>HvyAlcoholConsump(0,1):</strong> 0 if individual is not a heavy drinker, 1 if individual is a heavy drinker (&gt;14 drinks men, &gt;7 women)</p></li>
+<li><p><strong>Sex(0,1):</strong> 0 if individual is female, 1 if individual is male</p></li>
+<li><p><strong>Age(1-13):</strong> This variable captures if a user is in one of the following age categories:<br>
+1: 18-24, 2: 25-29, 3: 30-34, 4: 35-39, 5: 40-44, 6: 45-49, 7: 50-54,<br>
+8: 55-59, 9: 60-64, 10: 65-69, 11: 70-75, 12: 75-59, 13: 80-99</p></li>
+<li><p><strong>GenHlth(1-5):</strong> This variable captures a user’s overall health:<br>
+1: Excellent 2: Very Good 3: Good 4: Fair 5: Poor</p></li>
 </ul>
-<section id="all-variables-and-levels" class="level3">
-<h3 class="anchored" data-anchor-id="all-variables-and-levels">All Variables and Levels</h3>
-<p>https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset https://www.cdc.gov/brfss/annual_data/2015/pdf/codebook15_llcp.pdf</p>
-<p>Diabetes_binary: 0 if no diabetes, 1 if diabetes</p>
-<p>HighBP: 0 if not High Blood Pressure, 1 if High Blood Pressure HighChol: 0 if low, 1 if high CholCheck: 0 if not checked in 5 years, 1 if checked in 5 years Smoker: 0 if not smoked 5 packs of cigarettes, 1 if yes Stroke: 0 if no stroke, 1 if yes stroke HeartDiseaseorAttack: 0 if no heart disease/attack, 1 if yes PhysActivity: 0 if no physical activity in last month, 1 if yes Fruits: 0 if no daily fruit, 1 if daily fruit Veggies: 0 if no daily vegetables, 1 if daily vegetables HvyAlcoholConsump: 0 if not heavy drinker, 1 if heavy drinker (&gt;14 drinks men, &gt;7 women) AnyHealthcare: 0 if no healthcare, 1 if healthcare NoDocbcCost: 0 if not cost-restricted for doctors, 1 if yes DiffWalk: 0 if no difficulty walking, 1 if yes Sex: 0 if female, 1 if male</p>
-<p>GenHlth: 1-5 scale of overall health, 1 is excellent 5 is poor MentHlth: 1-30 scale of days with bad mental health. PhysHlth: 1-30 scale of days with bad physical health. Age: Education: Income:</p>
-<p>BMI: numerical variable of bmi</p>
-<ul>
-<li>what is the purpose of my eda and the goal with modeling</li>
-</ul>
+<p>The following variables were modified by the creator to accentuate differences in distribution.</p>
+<p><strong>MentHlth(0-2):</strong> scale of days with bad mental health.<br>
+0: Individual experiences no mental health pain.<br>
+1: Individual experiences some mental health pain in the last 30 days.<br>
+2: Individual experiences mental health pain every day.</p>
+<p><strong>PhysHlth(0-2):</strong> scale of days with bad physical health.<br>
+0: Individual experiences no physical health pain.<br>
+1: Individual experiences some physical health pain in the last 30 days.<br>
+2: Individual experiences physical health pain every day.</p>
+</section>
 </section>
 </section>
 <section id="exploratory-data-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory Data Analysis</h2>
-<section id="validating-the-data" class="level3">
-<h3 class="anchored" data-anchor-id="validating-the-data">Validating the Data</h3>
-<p>In terms of exploratory data analysis, I always like to take the first step of exploring missing values:</p>
+<p>My general thought process for EDA is to first investigate if there are any missing values first. If so, then investigate those rows/columns. Second, I want to check the structures of the data and make sure they all make sense. Lastly, let’s analyze some distributions of the individual categorical variables, and see if we can notice any cool trends. This will help us find an objective, and help us narrow down to some variables that we want to look at.</p>
+<section id="missing-values" class="level3">
+<h3 class="anchored" data-anchor-id="missing-values">Missing Values</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>(<span class="fu">sum</span>(<span class="fu">is.na</span>(diabetes)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0</code></pre>
 </div>
 </div>
-<p>Great! It looks like there are none. I think a natural next step would be to investigate all of the variables individually, and make sure their names are legible and their values are logical.</p>
+<p>Great! It looks like there are none. I think a natural next step would be to investigate all of the variables, and make sure their names are legible and their values are logical.</p>
+</section>
+<section id="variable-names" class="level3">
+<h3 class="anchored" data-anchor-id="variable-names">Variable Names</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as_tibble</span>(diabetes, <span class="at">width =</span> <span class="cn">Inf</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -179,7 +235,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 #   DiffWalk &lt;dbl&gt;, Sex &lt;dbl&gt;, Age &lt;dbl&gt;, Education &lt;dbl&gt;, Income &lt;dbl&gt;</code></pre>
 </div>
 </div>
-<p>Based on the given variable descriptions above, I believe that the variable names are rather sensical. However, it looks like the data was read in as entirely double and not as factors. Let’s fix that first for the binary variables. Since the binary variables take values 0 for no and 1 for yes, I figure we can just leave them as is. Sex is assigned to female or male respectively.</p>
+<p>Based on the given variable descriptions above, I believe that the variable names are rather sensical. However, it looks like the data was read in as entirely double and not as factors.</p>
+</section>
+<section id="changing-data-to-factors" class="level3">
+<h3 class="anchored" data-anchor-id="changing-data-to-factors">Changing Data to Factors</h3>
+<section id="binary" class="level4">
+<h4 class="anchored" data-anchor-id="binary">Binary</h4>
+<p>First, let’s start with all the variables that are binary. We can give Sex labels for ease of use, since the rest of them are just yes/no.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>diabetes <span class="ot">&lt;-</span> diabetes <span class="sc">|&gt;</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">7</span>, <span class="dv">8</span>, <span class="dv">9</span>, <span class="dv">10</span>, <span class="dv">11</span>, <span class="dv">12</span>, <span class="dv">13</span>, <span class="dv">14</span>, <span class="dv">18</span>), as.factor)) <span class="sc">|&gt;</span></span>
@@ -211,31 +273,57 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  $ Income              : num  3 1 8 6 4 8 7 4 1 3 ...</code></pre>
 </div>
 </div>
-<p>Similarly, we have other factors with multiple levels that need to be named and ordered. The names could matter later in analysis, and the same thing for the ordering.</p>
-<p>For PhysHlth and MntlHlth, there were a few considerations. Treating this as a numerical variable possibly loses information between 0 days and 1 day. Furthermore, I wanted to account those who are in pain all of the time. That is why I have decided to transform the levels into 0 = “No Pain”, 1 = “Some Pain”, and 2 = “Everyday Pain”.</p>
-<p>For the other variables, they are assigned with the labels provided in</p>
+</section>
+<section id="physhlth-menthlth" class="level4">
+<h4 class="anchored" data-anchor-id="physhlth-menthlth">PhysHlth MentHlth</h4>
+<p>PhysHlth and MentHlth are very interesting variables. A quick peep into the future showed me their distributions:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>diabetes <span class="ot">&lt;-</span> diabetes <span class="sc">|&gt;</span> </span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">GenHlth =</span> <span class="fu">factor</span>(GenHlth, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Excellent"</span>, <span class="st">"Very Good"</span>, <span class="st">"Good"</span>, <span class="st">"Fair"</span>, <span class="st">"Poor"</span>), <span class="at">ordered =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">MentHlth =</span> <span class="fu">case_when</span>(</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    MentHlth <span class="sc">==</span> <span class="dv">0</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    MentHlth <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">&amp;</span> MentHlth <span class="sc">&lt;=</span> <span class="dv">29</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    MentHlth <span class="sc">==</span> <span class="dv">30</span> <span class="sc">~</span> <span class="dv">2</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">|&gt;</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">MentHlth =</span> <span class="fu">factor</span>(MentHlth,<span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"No Pain"</span>, <span class="st">"Some Pain"</span>, <span class="st">"Everyday Pain"</span>),<span class="at">ordered =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">PhysHlth =</span> <span class="fu">case_when</span>(</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    PhysHlth <span class="sc">==</span> <span class="dv">0</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    PhysHlth <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">&amp;</span> PhysHlth <span class="sc">&lt;=</span> <span class="dv">29</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    PhysHlth <span class="sc">==</span> <span class="dv">30</span> <span class="sc">~</span> <span class="dv">2</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">|&gt;</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">PhysHlth =</span> <span class="fu">factor</span>(PhysHlth,<span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"No Pain"</span>, <span class="st">"Pain"</span>, <span class="st">"Everyday Pain"</span>),<span class="at">ordered =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Age =</span> <span class="fu">factor</span>(Age,<span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">13</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"18-24"</span>,<span class="st">"25-29"</span>,<span class="st">"30-34"</span>,<span class="st">"35-39"</span>,<span class="st">"40-44"</span>,<span class="st">"45-49"</span>,<span class="st">"50-54"</span>,<span class="st">"55-59"</span>,<span class="st">"60-64"</span>,<span class="st">"65-69"</span>,<span class="st">"70-74"</span>,<span class="st">"75-79"</span>,<span class="st">"80-99"</span>),<span class="at">ordered =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Education =</span> <span class="fu">factor</span>(Education,<span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"NoSchool"</span>,<span class="st">"Elementary"</span>,<span class="st">"Some high school"</span>,<span class="st">"High school graduate"</span>,<span class="st">"Some college or technical school"</span>,<span class="st">"College graduate"</span>),<span class="at">ordered =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Income =</span> <span class="fu">factor</span>(Income,<span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"&lt;$10,000"</span>,<span class="st">"$10,000-$14,999"</span>,<span class="st">"$15,000-$19,999"</span>,<span class="st">"$20,000-$24,999"</span>,<span class="st">"$25,000 - $34,999"</span>,<span class="st">"$35,000 - $49,999"</span>,<span class="st">"$50,000 - $74,999"</span>,<span class="st">"&gt;=$75,000"</span>),<span class="at">ordered =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#shoutout cowplot</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>gg_phys <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(diabetes, <span class="fu">aes</span>(<span class="at">x =</span> PhysHlth)) <span class="sc">+</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">10</span>, <span class="at">fill =</span> <span class="st">"salmon"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Physical Pain over Last 30 Days"</span>, <span class="at">x =</span> <span class="st">"Days"</span>, <span class="at">y =</span> <span class="st">"Frequency"</span>) <span class="sc">+</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>gg_ment <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(diabetes, <span class="fu">aes</span>(<span class="at">x =</span> MentHlth)) <span class="sc">+</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">10</span>, <span class="at">fill =</span> <span class="st">"cyan"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Mental Pain over Last 30 Days"</span>, <span class="at">x =</span> <span class="st">"Days"</span>, <span class="at">y =</span> <span class="st">"Frequency"</span>) <span class="sc">+</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(gg_phys, gg_ment)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="EDA_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
 </div>
+</div>
+<p>There are a few considerations that come to mind. Treating this as a numerical variable possibly loses information between 0 days and 1 day, since someone who is having no mental/physical pain is surely different than someone who is experiencing any sort of pain whatsoever. Furthermore, there is also a jump of individuals who are having pain all the time, which seems like another dichotic, important category. That is why I’ve decided to transform the variables into a 0,1,2 categorical ordered variable.</p>
+</section>
+<section id="ordered-factors" class="level4">
+<h4 class="anchored" data-anchor-id="ordered-factors">Ordered Factors</h4>
+<p>Next, We have other factors with multiple levels that need to be named and ordered. We will treat Age, GenHlth,Education, and Income as ordered factors since it follows the same trend as 1&lt;2&lt;…, etc.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>diabetes <span class="ot">&lt;-</span> diabetes <span class="sc">|&gt;</span> </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">GenHlth =</span> <span class="fu">factor</span>(GenHlth, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Excellent"</span>, <span class="st">"Very Good"</span>, <span class="st">"Good"</span>, <span class="st">"Fair"</span>, <span class="st">"Poor"</span>), <span class="at">ordered =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">MentHlth =</span> <span class="fu">case_when</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    MentHlth <span class="sc">==</span> <span class="dv">0</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    MentHlth <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">&amp;</span> MentHlth <span class="sc">&lt;=</span> <span class="dv">29</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    MentHlth <span class="sc">==</span> <span class="dv">30</span> <span class="sc">~</span> <span class="dv">2</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">|&gt;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">MentHlth =</span> <span class="fu">factor</span>(MentHlth,<span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"No Pain"</span>, <span class="st">"Some Pain"</span>, <span class="st">"Everyday Pain"</span>),<span class="at">ordered =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">PhysHlth =</span> <span class="fu">case_when</span>(</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    PhysHlth <span class="sc">==</span> <span class="dv">0</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    PhysHlth <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">&amp;</span> PhysHlth <span class="sc">&lt;=</span> <span class="dv">29</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    PhysHlth <span class="sc">==</span> <span class="dv">30</span> <span class="sc">~</span> <span class="dv">2</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">|&gt;</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">PhysHlth =</span> <span class="fu">factor</span>(PhysHlth,<span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"No Pain"</span>, <span class="st">"Some Pain"</span>, <span class="st">"Everyday Pain"</span>),<span class="at">ordered =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Age =</span> <span class="fu">factor</span>(Age,<span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">13</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"18-24"</span>,<span class="st">"25-29"</span>,<span class="st">"30-34"</span>,<span class="st">"35-39"</span>,<span class="st">"40-44"</span>,<span class="st">"45-49"</span>,<span class="st">"50-54"</span>,<span class="st">"55-59"</span>,<span class="st">"60-64"</span>,<span class="st">"65-69"</span>,<span class="st">"70-74"</span>,<span class="st">"75-79"</span>,<span class="st">"80-99"</span>),<span class="at">ordered =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Education =</span> <span class="fu">factor</span>(Education,<span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"NoSchool"</span>,<span class="st">"Elementary"</span>,<span class="st">"Some high school"</span>,<span class="st">"High school graduate"</span>,<span class="st">"Some college or technical school"</span>,<span class="st">"College graduate"</span>),<span class="at">ordered =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Income =</span> <span class="fu">factor</span>(Income,<span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"&lt;$10,000"</span>,<span class="st">"$10,000-$14,999"</span>,<span class="st">"$15,000-$19,999"</span>,<span class="st">"$20,000-$24,999"</span>,<span class="st">"$25,000 - $34,999"</span>,<span class="st">"$35,000 - $49,999"</span>,<span class="st">"$50,000 - $74,999"</span>,<span class="st">"&gt;=$75,000"</span>),<span class="at">ordered =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="final-checks" class="level4">
+<h4 class="anchored" data-anchor-id="final-checks">Final Checks</h4>
 <p>Now, ALL of the data should be correctly formatted and validated!</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(diabetes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(diabetes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   253680 obs. of  22 variables:
  $ Diabetes_binary     : Factor w/ 2 levels "0","1": 1 1 1 1 1 1 1 1 2 1 ...
@@ -254,7 +342,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  $ NoDocbcCost         : Factor w/ 2 levels "0","1": 1 2 2 1 1 1 1 1 1 1 ...
  $ GenHlth             : Ord.factor w/ 5 levels "Excellent"&lt;"Very Good"&lt;..: 5 3 5 2 2 2 3 3 5 2 ...
  $ MentHlth            : Ord.factor w/ 3 levels "No Pain"&lt;"Some Pain"&lt;..: 2 1 3 1 2 1 1 1 3 1 ...
- $ PhysHlth            : Ord.factor w/ 3 levels "No Pain"&lt;"Pain"&lt;..: 2 1 3 1 1 2 2 1 3 1 ...
+ $ PhysHlth            : Ord.factor w/ 3 levels "No Pain"&lt;"Some Pain"&lt;..: 2 1 3 1 1 2 2 1 3 1 ...
  $ DiffWalk            : Factor w/ 2 levels "0","1": 2 1 2 1 1 1 1 2 2 1 ...
  $ Sex                 : Factor w/ 2 levels "Female","Male": 1 1 1 1 1 2 1 1 1 2 ...
  $ Age                 : Ord.factor w/ 13 levels "18-24"&lt;"25-29"&lt;..: 9 7 9 11 11 10 9 11 9 8 ...
@@ -262,22 +350,191 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  $ Income              : Ord.factor w/ 8 levels "&lt;$10,000"&lt;"$10,000-$14,999"&lt;..: 3 1 8 6 4 8 7 4 1 3 ...</code></pre>
 </div>
 </div>
+<p>Looks good!</p>
+</section>
 </section>
 <section id="determining-an-objective" class="level3">
 <h3 class="anchored" data-anchor-id="determining-an-objective">Determining an Objective</h3>
+<section id="attempt-1" class="level4">
+<h4 class="anchored" data-anchor-id="attempt-1">Attempt 1:</h4>
 <p>Now that all of the data is correctly validated, we can determine which variables we are interested in looking at. I tend to like looking at more unexpected, or indirect routes to find relationships I wouldn’t obviously expect. I believe that diet and the byproducts of a poor one will lead to a higher probability of diabetes. I’ll approach this from a socioeconomic standpoint instead, plus a few extra variables that I am curious about.</p>
-<p>Variables of interest: Fruits, Veggies, AnyHealthCare, NoDocbcCost, GenHlth, MentHlth, PhysHlth, Sex, Age, Education, Income</p>
+<p>Variables of interest: AnyHealthCare, NoDocbcCost, GenHlth, MentHlth, PhysHlth, Sex, Age, Education, Income</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>diabetes_final <span class="ot">&lt;-</span> diabetes <span class="sc">|&gt;</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">c</span>(Diabetes_binary, AnyHealthcare, NoDocbcCost, GenHlth, MentHlth, PhysHlth, Sex, Age, Education, Income))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>diabetes_final <span class="ot">&lt;-</span> diabetes <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">c</span>(Diabetes_binary, AnyHealthcare, NoDocbcCost, GenHlth, MentHlth, PhysHlth, Sex, Age, Education, Income))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>This means we have no numeric variables. I figure that, instead of looking at 12 different table() calls, it may be helpful to see barcharts.</p>
+<p>Reconsideration:</p>
+<p>Hello! This is Robbie from the future after conducting Modeling. The models were all terrible, and the false negative rate was like 99%! So I’ve decided to include some extra predictors that will hopefully help us out. I understand failure is part of the process, and maybe I should’ve stuck with it, but I want a worthwhile model!</p>
+</section>
+<section id="final-objective" class="level4">
+<h4 class="anchored" data-anchor-id="final-objective">Final Objective</h4>
+<p>There are a few scattered things I’d like to explore. I am only particularly interested in categorical variables, so bye bye BMI. Blood pressure and Cholesterol variables are natural choices. I included demographic variables(Sex,Age) to see if they had any worthwhile contributions alongside the health variables. I also wanted to see how my newly transformed MentHlth and PhysHlth variables were going to do. I also included random variables, like Fruits, DiffWalk, HvyAlcoholConsump to see if there was any importance from those whatsoever, because I am naive to their relationship with diabetes. The other variables included seemed like natural choices. This removes a total of 8 predictors from the original dataset, just to explore some of these particular relationships I am interested in.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(diabetes_final, <span class="at">file =</span> <span class="st">"diabetes_final.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>diabetes_final <span class="ot">&lt;-</span> diabetes <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">c</span>(Diabetes_binary, HighBP, HighChol, Fruits, DiffWalk, Smoker,CholCheck,HeartDiseaseorAttack, HvyAlcoholConsump, GenHlth, MentHlth, PhysHlth, Sex, Age))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="distributions-and-frequency" class="level3">
+<h3 class="anchored" data-anchor-id="distributions-and-frequency">Distributions and Frequency</h3>
+<p>Now that I’ve created a subset of predictors just based on interest (and to save me time!) Let’s go ahead and analyze our predictors and determine if any others need to be changed or taken out. MentHlth and PhysHlth were modified “post-hoc” in a sense, since I had moved them up and transformed them there.</p>
+<section id="response-variable-1" class="level4">
+<h4 class="anchored" data-anchor-id="response-variable-1">Response Variable</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diabetes_final, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(Diabetes_binary), <span class="at">fill =</span> <span class="fu">factor</span>(Diabetes_binary))) <span class="sc">+</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Prevelance of Diabetes"</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Diabetes (0 = No, 1 = Yes)"</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Frequency"</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Diabetes_binary"</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"0"</span> <span class="ot">=</span> <span class="st">"darkblue"</span>, <span class="st">"1"</span> <span class="ot">=</span> <span class="st">"yellow"</span>)) <span class="sc">+</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> comma) <span class="sc">+</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="EDA_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>We notice here that it is much more likely for a random individual in this dataset to not have diabetes than to have diabetes. Generally, we then would expect our predictor variables that have an extreme dichotic nature from person to person to do the best.</p>
+</section>
+<section id="binary-variables" class="level4">
+<h4 class="anchored" data-anchor-id="binary-variables">Binary Variables</h4>
+<p>Let’s create an ordered stacked bar plot so that we can look at the categorical variables better. Sure, we can make contingency tables, but I personally feel like this is nicer:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>binary_data_hist <span class="ot">&lt;-</span> diabetes_final <span class="sc">|&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">c</span>(HvyAlcoholConsump, HeartDiseaseorAttack, DiffWalk, HighChol, HighBP, Smoker, Fruits, CholCheck)) <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="fu">everything</span>(), </span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"Variable"</span>, </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"Response"</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Variable, Response) <span class="sc">|&gt;</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Variable) <span class="sc">|&gt;</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Proportion =</span> Count <span class="sc">/</span> <span class="fu">sum</span>(Count)) <span class="sc">|&gt;</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Variable =</span> <span class="fu">factor</span>(Variable, <span class="at">levels =</span> <span class="fu">c</span>(</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"HvyAlcoholConsump"</span>, <span class="st">"HeartDiseaseorAttack"</span>, <span class="st">"DiffWalk"</span>, </span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"HighChol"</span>, <span class="st">"HighBP"</span>, <span class="st">"Smoker"</span>, <span class="st">"Fruits"</span>, <span class="st">"CholCheck"</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  )))</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(binary_data_hist, <span class="fu">aes</span>(<span class="at">x =</span> Variable, <span class="at">y =</span> Proportion, <span class="at">fill =</span> <span class="fu">factor</span>(Response))) <span class="sc">+</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="st">"fill"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>()) <span class="sc">+</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Binary Predictor Frequencies"</span>,</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Binary Variables(0 = No, 1 = Yes)"</span>,</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Proportion"</span>,</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Response"</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>,<span class="at">size =</span><span class="dv">12</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="EDA_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>viola! So, we notice that not a lot of people are heavy drinkers, even less so than those who have heart attacks. Interesting! The good thing that we see here is that there is a lot of dispersion, some variables tend to have a lot of no’s, some are pretty equal, and CholCheck is very very high, with fruits also above the 50% margin.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diabetes_final, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(Sex), <span class="at">fill =</span> <span class="fu">factor</span>(Sex))) <span class="sc">+</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Female/Male"</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Gender"</span>,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Frequency"</span>,</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Sex"</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Female"</span> <span class="ot">=</span> <span class="st">"hotpink"</span>, <span class="st">"Male"</span> <span class="ot">=</span> <span class="st">"blue"</span>)) <span class="sc">+</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> comma) <span class="sc">+</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="EDA_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Looking at Sex, we see that there are slightly more females in the dataset than males. I don’t imagine this will cause any issues since the distributions are relatively similar, and close to the real world population as well.</p>
+</section>
+<section id="ordered-predictors" class="level4">
+<h4 class="anchored" data-anchor-id="ordered-predictors">Ordered Predictors</h4>
+<p>With these predictors, I figure it may be helpful to look at them individually.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diabetes_final, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(GenHlth), <span class="at">fill =</span> <span class="fu">factor</span>(GenHlth))) <span class="sc">+</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"General Health"</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Health Rating"</span>,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Frequency"</span>,</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"GenHlth"</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Excellent"</span> <span class="ot">=</span> <span class="st">"#FFB3BA"</span>, <span class="st">"Very Good"</span> <span class="ot">=</span> <span class="st">"#FF6666"</span>, <span class="st">"Good"</span> <span class="ot">=</span> <span class="st">"#FF0000"</span>, <span class="st">"Fair"</span> <span class="ot">=</span> <span class="st">"#CC0000"</span>, <span class="st">"Poor"</span> <span class="ot">=</span> <span class="st">"#990000"</span>)) <span class="sc">+</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="EDA_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>In this case, we notice most individuals stick somewhere around the middle. Our natural intuition tells us that those towards the left of the graph (those in better health) are less likely to have diabetes.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diabetes_final, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(MentHlth), <span class="at">fill =</span> <span class="fu">factor</span>(MentHlth))) <span class="sc">+</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Overall Mental Pain (Last 30 Days)"</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Occurence of Pain"</span>,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Frequency"</span>,</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"MentHlth"</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"No Pain"</span> <span class="ot">=</span> <span class="st">"#A8E6A1"</span>, <span class="st">"Some Pain"</span> <span class="ot">=</span> <span class="st">"#56B956"</span>, <span class="st">"Everyday Pain"</span> <span class="ot">=</span> <span class="st">"#006400"</span>)) <span class="sc">+</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="EDA_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diabetes_final, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(PhysHlth), <span class="at">fill =</span> <span class="fu">factor</span>(PhysHlth))) <span class="sc">+</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Overall Physical Pain (Last 30 Days)"</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Occurence of Pain"</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Frequency"</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"PhysHlth"</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"No Pain"</span> <span class="ot">=</span> <span class="st">"#A2DFF7"</span>, <span class="st">"Some Pain"</span> <span class="ot">=</span> <span class="st">"#4682B4"</span>, <span class="st">"Everyday Pain"</span> <span class="ot">=</span> <span class="st">"#000080"</span>)) <span class="sc">+</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="EDA_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>I like these graphs a lot better than the ones with 30 levels. We notice here that most individuals do not report any pain whatsoever, however there are a proportion of individuals who do report pain and I imagine that will be a pretty good predictor of diabetes rate.</p>
+<p>Out of curiosity, let’s look at a contingency table for the two of these variables:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>ment_phys_table<span class="ot">&lt;-</span> <span class="fu">table</span>(diabetes_final<span class="sc">$</span>MentHlth, diabetes_final<span class="sc">$</span>PhysHlth)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(ment_phys_table) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"No Mental Pain"</span>, <span class="st">"Some Mental Pain"</span>, <span class="st">"Everyday Mental Pain"</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(ment_phys_table) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"No Physical Pain"</span>, <span class="st">"Some Physical Pain"</span>, <span class="st">"Everyday Physical Pain"</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>ment_phys_table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                      
+                       No Physical Pain Some Physical Pain
+  No Mental Pain                 125985              40566
+  Some Mental Pain                30784              29501
+  Everyday Mental Pain             3283               4161
+                      
+                       Everyday Physical Pain
+  No Mental Pain                         9129
+  Some Mental Pain                       5627
+  Everyday Mental Pain                   4644</code></pre>
+</div>
+</div>
+<p>This displays some interesting relationships between mental and physical pain! It’s quite interesting to see that it’s not always that those who are experiencing everyday physical pain are also experiencing everyday mental pain.</p>
+<p><strong>This ends the EDA! Lastly, we will be saving our final diabetes file to an R object for use in EDA as well as the API.r.</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(diabetes_final, <span class="at">file =</span> <span class="st">"diabetes_final.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><a href="Modeling.html">Click here for the Modeling Page</a></p>
 
 
+</section>
 </section>
 </section>
 
