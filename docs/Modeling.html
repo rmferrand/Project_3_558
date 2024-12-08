@@ -109,7 +109,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#train-and-test-split" id="toc-train-and-test-split" class="nav-link active" data-scroll-target="#train-and-test-split">Train and Test Split</a></li>
-  <li><a href="#classification-tree" id="toc-classification-tree" class="nav-link" data-scroll-target="#classification-tree">Classification Tree</a></li>
+  <li><a href="#classification-tree" id="toc-classification-tree" class="nav-link" data-scroll-target="#classification-tree">Classification Tree</a>
+  <ul class="collapse">
+  <li><a href="#recipe" id="toc-recipe" class="nav-link" data-scroll-target="#recipe">Recipe</a></li>
+  <li><a href="#paramaterization-of-the-tree" id="toc-paramaterization-of-the-tree" class="nav-link" data-scroll-target="#paramaterization-of-the-tree">Paramaterization of the Tree</a></li>
+  <li><a href="#fitting-the-tree" id="toc-fitting-the-tree" class="nav-link" data-scroll-target="#fitting-the-tree">Fitting the Tree</a></li>
+  <li><a href="#best-tree-model" id="toc-best-tree-model" class="nav-link" data-scroll-target="#best-tree-model">Best Tree Model</a></li>
+  </ul></li>
   <li><a href="#random-forests" id="toc-random-forests" class="nav-link" data-scroll-target="#random-forests">Random Forests</a></li>
   </ul>
 </nav>
@@ -165,76 +171,63 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="classification-tree" class="level2">
 <h2 class="anchored" data-anchor-id="classification-tree">Classification Tree</h2>
 <p>The classification tree splits up predictor spaces into different regions, such that we can make different predictions based on the particular “region” of the data we are exploring. Using</p>
+<section id="recipe" class="level3">
+<h3 class="anchored" data-anchor-id="recipe">Recipe</h3>
+<p>We first set up the recipe that we will be using for both the classification tree and the random forest. We have no numerical variables, so we are just concerned with making sure all of the categorical variables are “dummied”, or normalized such that we can correctly standardize them and their importance in the model.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>tree_rec <span class="ot">&lt;-</span> <span class="fu">recipe</span>(Diabetes_binary <span class="sc">~</span> ., <span class="at">data =</span> train_diabetes) <span class="sc">|&gt;</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_dummy</span>(HighBP, HighChol, Fruits, DiffWalk, Smoker,CholCheck,HeartDiseaseorAttack, HvyAlcoholConsump, GenHlth, MentHlth, PhysHlth, Sex, Age)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>tree_rec</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code></code></pre>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_dummy</span>(HighBP, HighChol, Fruits, DiffWalk, Smoker,CholCheck,HeartDiseaseorAttack, HvyAlcoholConsump, GenHlth, MentHlth, PhysHlth, Sex, Age)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Recipe ──────────────────────────────────────────────────────────────────────</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code></code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Inputs </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Number of variables by role</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>outcome:    1
-predictor: 13</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code></code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Operations </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>• Dummy variables from: HighBP, HighChol, Fruits, DiffWalk, Smoker, ...</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>tree_mod <span class="ot">&lt;-</span> <span class="fu">decision_tree</span>(<span class="at">tree_depth =</span> <span class="fu">tune</span>(),</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">min_n =</span> <span class="dv">10</span>,</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">cost_complexity =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"rpart"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>tree_grid <span class="ot">&lt;-</span> <span class="fu">grid_regular</span>(<span class="fu">cost_complexity</span>(), <span class="fu">tree_depth</span>(), <span class="at">levels =</span> <span class="dv">10</span>)</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>tree_wkf <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">|&gt;</span></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_recipe</span>(tree_rec) <span class="sc">|&gt;</span></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(tree_mod)</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>tree_fits <span class="ot">&lt;-</span> tree_wkf <span class="sc">|&gt;</span> </span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tune_grid</span>(<span class="at">resamples =</span> cv_folds,</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>            <span class="at">grid =</span> tree_grid,<span class="at">metrics =</span> <span class="fu">metric_set</span>(mn_log_loss))</span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>tree_fits <span class="sc">|&gt;</span></span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="paramaterization-of-the-tree" class="level3">
+<h3 class="anchored" data-anchor-id="paramaterization-of-the-tree">Paramaterization of the Tree</h3>
+<p>Using the <code>decision_tree()</code> function, we can set the minimum number of data that are required for the node to be split, or for the tree to create a branch. We have set it low here, such that we can capture important trends within the data. When I was troubleshooting this step, I originally had it set to 500, but realized it was missing some trends in the data that improved prediction a lot.</p>
+<p>While setting up the grid using <code>grid_regular()</code> , I allowed for 10 levels which is generally considered a lot, but I figured it was important to create a large set of possible trees for the model to split on.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>tree_mod <span class="ot">&lt;-</span> <span class="fu">decision_tree</span>(<span class="at">tree_depth =</span> <span class="fu">tune</span>(),</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">min_n =</span> <span class="dv">10</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">cost_complexity =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"rpart"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>tree_grid <span class="ot">&lt;-</span> <span class="fu">grid_regular</span>(<span class="fu">cost_complexity</span>(), <span class="fu">tree_depth</span>(), <span class="at">levels =</span> <span class="dv">10</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>tree_grid</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 100 × 8
-   cost_complexity tree_depth .metric     .estimator  mean     n std_err .config
-             &lt;dbl&gt;      &lt;int&gt; &lt;chr&gt;       &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;  
- 1    0.0000000001          1 mn_log_loss binary     0.415     5  0.0113 Prepro…
- 2    0.000000001           1 mn_log_loss binary     0.415     5  0.0113 Prepro…
- 3    0.00000001            1 mn_log_loss binary     0.415     5  0.0113 Prepro…
- 4    0.0000001             1 mn_log_loss binary     0.415     5  0.0113 Prepro…
- 5    0.000001              1 mn_log_loss binary     0.415     5  0.0113 Prepro…
- 6    0.00001               1 mn_log_loss binary     0.415     5  0.0113 Prepro…
- 7    0.0001                1 mn_log_loss binary     0.415     5  0.0113 Prepro…
- 8    0.001                 1 mn_log_loss binary     0.415     5  0.0113 Prepro…
- 9    0.01                  1 mn_log_loss binary     0.415     5  0.0113 Prepro…
-10    0.1                   1 mn_log_loss binary     0.415     5  0.0113 Prepro…
+<pre><code># A tibble: 100 × 2
+   cost_complexity tree_depth
+             &lt;dbl&gt;      &lt;int&gt;
+ 1    0.0000000001          1
+ 2    0.000000001           1
+ 3    0.00000001            1
+ 4    0.0000001             1
+ 5    0.000001              1
+ 6    0.00001               1
+ 7    0.0001                1
+ 8    0.001                 1
+ 9    0.01                  1
+10    0.1                   1
 # ℹ 90 more rows</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>tree_fits <span class="sc">|&gt;</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>() <span class="sc">|&gt;</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.metric <span class="sc">==</span> <span class="st">"mn_log_loss"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>tree_wkf <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_recipe</span>(tree_rec) <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(tree_mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="fitting-the-tree" class="level3">
+<h3 class="anchored" data-anchor-id="fitting-the-tree">Fitting the Tree</h3>
+<p>Now, we can apply the workflow and grid we just created to find the best tree. We are interested in mean log loss, so we use that as the metric when applying fits.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>tree_fits <span class="ot">&lt;-</span> tree_wkf <span class="sc">|&gt;</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tune_grid</span>(<span class="at">resamples =</span> cv_folds,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">grid =</span> tree_grid,<span class="at">metrics =</span> <span class="fu">metric_set</span>(mn_log_loss))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#tree_fits |&gt; collect_metrics()</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>tree_fits <span class="sc">|&gt;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>() <span class="sc">|&gt;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.metric <span class="sc">==</span> <span class="st">"mn_log_loss"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 100 × 8
    cost_complexity tree_depth .metric     .estimator  mean     n std_err .config
@@ -251,75 +244,87 @@ predictor: 13</code></pre>
 10    0.000000001           4 mn_log_loss binary     0.380     5  0.0140 Prepro…
 # ℹ 90 more rows</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>tree_best_params <span class="ot">&lt;-</span> <span class="fu">select_best</span>(tree_fits, <span class="at">metric=</span> <span class="st">"mn_log_loss"</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>tree_best_params</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="best-tree-model" class="level3">
+<h3 class="anchored" data-anchor-id="best-tree-model">Best Tree Model</h3>
+<p>Using <code>select_best()</code>, we can find the tree model with the lowest mn log loss. We then take this model and fit it to the entire training set. After fitting it to the entire training dataset, we fit it to the test dataset to see what the final mn log loss is for this model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>tree_best_params <span class="ot">&lt;-</span> <span class="fu">select_best</span>(tree_fits, <span class="at">metric=</span> <span class="st">"mn_log_loss"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>tree_best_params</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 3
   cost_complexity tree_depth .config               
             &lt;dbl&gt;      &lt;int&gt; &lt;chr&gt;                 
 1    0.0000000001          5 Preprocessor1_Model031</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">#finalize model on training set</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>tree_final_wkf <span class="ot">&lt;-</span> tree_wkf <span class="sc">|&gt;</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">finalize_workflow</span>(tree_best_params)</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>tree_final_fit <span class="ot">&lt;-</span> tree_final_wkf <span class="sc">|&gt;</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">last_fit</span>(data_split, <span class="at">metrics =</span> <span class="fu">metric_set</span>(mn_log_loss))</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>tree_final_fit <span class="sc">|&gt;</span></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#finalize model on training set</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>tree_final_wkf <span class="ot">&lt;-</span> tree_wkf <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">finalize_workflow</span>(tree_best_params)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>tree_final_fit <span class="ot">&lt;-</span> tree_final_wkf <span class="sc">|&gt;</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">last_fit</span>(data_split, <span class="at">metrics =</span> <span class="fu">metric_set</span>(mn_log_loss))</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>tree_final_fit <span class="sc">|&gt;</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 4
   .metric     .estimator .estimate .config             
   &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;               
 1 mn_log_loss binary         0.355 Preprocessor1_Model1</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>tree_final_fit <span class="sc">|&gt;</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extract_workflow</span>() <span class="sc">|&gt;</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extract_fit_engine</span>() <span class="sc">|&gt;</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  rpart.plot<span class="sc">::</span><span class="fu">rpart.plot</span>(<span class="at">roundint =</span> <span class="cn">FALSE</span>, <span class="at">type =</span> <span class="dv">2</span>, <span class="at">extra =</span> <span class="dv">104</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Results look decent at best. Let’s go ahead and look at the picture of this tree:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>tree_final_fit <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extract_workflow</span>() <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extract_fit_engine</span>() <span class="sc">|&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  rpart.plot<span class="sc">::</span><span class="fu">rpart.plot</span>(<span class="at">roundint =</span> <span class="cn">FALSE</span>, <span class="at">type =</span> <span class="dv">2</span>, <span class="at">extra =</span> <span class="dv">104</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="Modeling_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+<p><img src="Modeling_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>Looks pretty complex. Alas, we still have one more model to test.</p>
+</section>
 </section>
 <section id="random-forests" class="level2">
 <h2 class="anchored" data-anchor-id="random-forests">Random Forests</h2>
+<p>With random forests, we will be using the same setup</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>rf_spec <span class="ot">&lt;-</span> <span class="fu">rand_forest</span>(</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">mtry =</span> <span class="fu">tune</span>(),</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">min_n =</span> <span class="dv">10</span>,</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">trees =</span> <span class="dv">500</span></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a> <span class="fu">set_engine</span>(<span class="st">"ranger"</span>, <span class="at">importance =</span> <span class="st">"impurity"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a> <span class="fu">set_mode</span>(<span class="st">"classification"</span>)</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>rf_wkf <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">|&gt;</span></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a> <span class="fu">add_recipe</span>(tree_rec) <span class="sc">|&gt;</span></span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a> <span class="fu">add_model</span>(rf_spec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>rf_spec <span class="ot">&lt;-</span> <span class="fu">rand_forest</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">mtry =</span> <span class="fu">tune</span>(),</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">min_n =</span> <span class="dv">10</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">trees =</span> <span class="dv">500</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a> <span class="fu">set_engine</span>(<span class="st">"ranger"</span>, <span class="at">importance =</span> <span class="st">"impurity"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a> <span class="fu">set_mode</span>(<span class="st">"classification"</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>rf_wkf <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">|&gt;</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a> <span class="fu">add_recipe</span>(tree_rec) <span class="sc">|&gt;</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a> <span class="fu">add_model</span>(rf_spec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>rf_grid <span class="ot">&lt;-</span> <span class="fu">grid_regular</span>(</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mtry</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">13</span>)),</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="dv">5</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>rf_fit <span class="ot">&lt;-</span> rf_wkf <span class="sc">|&gt;</span></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tune_grid</span>(</span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">resamples =</span> cv_folds,</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">grid =</span> rf_grid,</span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">metrics =</span> <span class="fu">metric_set</span>(mn_log_loss)</span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>rf_grid <span class="ot">&lt;-</span> <span class="fu">grid_regular</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mtry</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">13</span>)),</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="dv">5</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>rf_fit <span class="ot">&lt;-</span> rf_wkf <span class="sc">|&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tune_grid</span>(</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">resamples =</span> cv_folds,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">grid =</span> rf_grid,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">metrics =</span> <span class="fu">metric_set</span>(mn_log_loss)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'ranger' was built under R version 4.3.3</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>rf_fit <span class="sc">|&gt;</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">collect_metrics</span>() <span class="sc">|&gt;</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">filter</span>(.metric <span class="sc">==</span> <span class="st">"mn_log_loss"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a> <span class="fu">arrange</span>(mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>rf_fit <span class="sc">|&gt;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">collect_metrics</span>() <span class="sc">|&gt;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">filter</span>(.metric <span class="sc">==</span> <span class="st">"mn_log_loss"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a> <span class="fu">arrange</span>(mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 7
    mtry .metric     .estimator  mean     n std_err .config             
@@ -332,8 +337,8 @@ predictor: 13</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>rf_best_params <span class="ot">&lt;-</span> <span class="fu">select_best</span>(rf_fit, <span class="at">metric =</span> <span class="st">"mn_log_loss"</span>)</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>rf_best_params</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>rf_best_params <span class="ot">&lt;-</span> <span class="fu">select_best</span>(rf_fit, <span class="at">metric =</span> <span class="st">"mn_log_loss"</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>rf_best_params</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 2
    mtry .config             
@@ -342,14 +347,14 @@ predictor: 13</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>rf_final_wkf <span class="ot">&lt;-</span> rf_wkf <span class="sc">|&gt;</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">finalize_workflow</span>(rf_best_params)</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>rf_final_fit <span class="ot">&lt;-</span> rf_final_wkf <span class="sc">|&gt;</span></span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a> <span class="fu">last_fit</span>(data_split, <span class="at">metrics =</span> <span class="fu">metric_set</span>(mn_log_loss))</span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>rf_final_fit <span class="sc">|&gt;</span></span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>rf_final_wkf <span class="ot">&lt;-</span> rf_wkf <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">finalize_workflow</span>(rf_best_params)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>rf_final_fit <span class="ot">&lt;-</span> rf_final_wkf <span class="sc">|&gt;</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a> <span class="fu">last_fit</span>(data_split, <span class="at">metrics =</span> <span class="fu">metric_set</span>(mn_log_loss))</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>rf_final_fit <span class="sc">|&gt;</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 4
   .metric     .estimator .estimate .config             
@@ -358,13 +363,13 @@ predictor: 13</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>rf_full_fit <span class="ot">&lt;-</span> rf_final_wkf <span class="sc">|&gt;</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">fit</span>(diabetes_final)</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>rf_final_model <span class="ot">&lt;-</span> <span class="fu">extract_fit_engine</span>(rf_full_fit)</span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>rf_imp <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">term =</span> <span class="fu">names</span>(<span class="fu">importance</span>(rf_final_model)),<span class="at">value =</span> <span class="fu">importance</span>(rf_final_model)) <span class="sc">|&gt;</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(value))</span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>rf_imp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>rf_full_fit <span class="ot">&lt;-</span> rf_final_wkf <span class="sc">|&gt;</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">fit</span>(diabetes_final)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>rf_final_model <span class="ot">&lt;-</span> <span class="fu">extract_fit_engine</span>(rf_full_fit)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>rf_imp <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">term =</span> <span class="fu">names</span>(<span class="fu">importance</span>(rf_final_model)),<span class="at">value =</span> <span class="fu">importance</span>(rf_final_model)) <span class="sc">|&gt;</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(value))</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>rf_imp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 29 × 2
    term                    value
@@ -383,34 +388,34 @@ predictor: 13</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>rf_imp <span class="sc">|&gt;</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">mutate</span>(<span class="at">term =</span> <span class="fu">factor</span>(term, <span class="at">levels =</span> term)) <span class="sc">|&gt;</span></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> term, <span class="at">y =</span> value)) <span class="sc">+</span></span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a> <span class="fu">geom_bar</span>(<span class="at">stat =</span><span class="st">"identity"</span>) <span class="sc">+</span></span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a> <span class="fu">coord_flip</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>rf_imp <span class="sc">|&gt;</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">mutate</span>(<span class="at">term =</span> <span class="fu">factor</span>(term, <span class="at">levels =</span> term)) <span class="sc">|&gt;</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> term, <span class="at">y =</span> value)) <span class="sc">+</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a> <span class="fu">geom_bar</span>(<span class="at">stat =</span><span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a> <span class="fu">coord_flip</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="Modeling_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+<p><img src="Modeling_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a> prediction <span class="ot">&lt;-</span> <span class="fu">predict</span>(rf_full_fit, diabetes_final, <span class="at">type =</span> <span class="st">"class"</span>)</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  results <span class="ot">&lt;-</span> diabetes_final <span class="sc">|&gt;</span></span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">Predicted =</span> prediction<span class="sc">$</span>.pred_class)</span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  confusion <span class="ot">&lt;-</span> <span class="fu">conf_mat</span>(<span class="at">data =</span> results, <span class="at">truth =</span> Diabetes_binary, <span class="at">estimate =</span> Predicted)</span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  confusion_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(confusion<span class="sc">$</span>table)</span>
-<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>  confusion_plot<span class="ot">&lt;-</span> <span class="fu">autoplot</span>(confusion, <span class="at">type =</span> <span class="st">"heatmap"</span>)</span>
-<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(confusion_plot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a> prediction <span class="ot">&lt;-</span> <span class="fu">predict</span>(rf_full_fit, diabetes_final, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  results <span class="ot">&lt;-</span> diabetes_final <span class="sc">|&gt;</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">Predicted =</span> prediction<span class="sc">$</span>.pred_class)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  confusion <span class="ot">&lt;-</span> <span class="fu">conf_mat</span>(<span class="at">data =</span> results, <span class="at">truth =</span> Diabetes_binary, <span class="at">estimate =</span> Predicted)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  confusion_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(confusion<span class="sc">$</span>table)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  confusion_plot<span class="ot">&lt;-</span> <span class="fu">autoplot</span>(confusion, <span class="at">type =</span> <span class="st">"heatmap"</span>)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(confusion_plot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="Modeling_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+<p><img src="Modeling_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co">#saveRDS(rf_final_wkf, file = "rf_final_wkf.rds")</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="co">#saveRDS(rf_full_fit, file = "rf_full_fit.rds")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">#saveRDS(rf_final_wkf, file = "rf_final_wkf.rds")</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co">#saveRDS(rf_full_fit, file = "rf_full_fit.rds")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
