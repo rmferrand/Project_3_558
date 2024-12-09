@@ -1,18 +1,33 @@
 ---
 title: "Modeling"
-format: html
+author: Robbie Ferrand
+toc: true
+toc-depth: 3
+toc-location: right
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: right
 editor: visual
 ---
 
+Welcome to the modeling section! This is a direct continuation from the [Exploratory Data Analysis, or (EDA) section found here.](EDA.html)
+
+The purpose of this section is to take the newly subsetted Diabetes dataset and compare it to two different models: the classification tree and the random forest. Based on the mean log loss (lower is better), we will determine which model is the best and use it for the API, which can be accessed upon request. All modeling steps and relevant intermediary notes will be annotated and explained.
+
 ## Train and Test Split
 
-```{r}
+The first step of any modeling journey is to create a test/train split. This is so that we can reduce overfitting - or essentially "hide" parts of the data to make sure we perform as well on the train set as we do on the test set. Let's load in our necessary libraries and set our seed. Using the readRDS, we can access the previously created file from the [EDA section.](EDA.html)
+
+```{r, message = FALSE, warning=FALSE}
+library(tidyverse)
 library(tidymodels)
+library(ranger)
 set.seed(558)
 
 diabetes_final <- readRDS(file = "diabetes_final.rds")
-
-diabetes_final <- diabetes_final |> slice_sample(n = 5000)
+#diabetes_final <- diabetes_final |> slice_sample(n = 5000)
 
 
 data_split <- initial_split(diabetes_final, prop = 0.70)
@@ -23,50 +38,65 @@ test_diabetes <- testing(data_split)
 cv_folds <- vfold_cv(train_diabetes, v = 5)
 ```
 
+We will be using 5-fold cross validation, which will test and train the model on different iterations of the data.
 
 ## Classification Tree
 
+The classification tree splits up predictor spaces into different regions, such that we can make different predictions based on the particular "region" of the data we are exploring. The region of prediction is made by the most common class in that specific region, and we are using it in this case to predict the binary (0,1) response variable of diabetes incidence. Classification trees do tend to be easier to visualize, which may be an advantage over the Random Forest. Important to note that this is one of the methods of supervised learning. More about the process and parameters below.
+
+### Recipe
+
+We first set up the recipe that we will be using for both the classification tree and the random forest. We have no numerical variables, so we are just concerned with making sure all of the categorical variables are "dummied", or normalized such that we can correctly standardize them and their importance in the model.
+
 ```{r}
 tree_rec <- recipe(Diabetes_binary ~ ., data = train_diabetes) |>
-  step_dummy(AnyHealthcare, NoDocbcCost, GenHlth, MentHlth, PhysHlth, Sex, Age, Education, Income)
-tree_rec
+  step_dummy(HighBP, HighChol, Fruits, DiffWalk, Smoker,CholCheck,HeartDiseaseorAttack, HvyAlcoholConsump, GenHlth, MentHlth, PhysHlth, Sex, Age)
+```
 
+### Paramaterization of the Tree
 
+Using the `decision_tree()` function, we can set the minimum number of data that are required for the node to be split, or for the tree to create a branch. We have set it low here, such that we can capture important trends within the data. When I was troubleshooting this step, I originally had it set to 500, but realized it was missing some trends in the data that improved prediction a lot.
+
+While setting up the grid using `grid_regular()` , I allowed for 10 levels which is generally considered a lot, but I figured it was important to create a large set of possible trees for the model to split on.
+
+```{r}
 tree_mod <- decision_tree(tree_depth = tune(),
-                          min_n = 500,
+                          min_n = 10,
                           cost_complexity = tune()) |>
   set_engine("rpart") |>
   set_mode("classification")
 
-#tree_grid <- tibble(
-#  cost_complexity = c(0.01, 0.1),
-#  tree_depth = c(5, 10)
-#)
-
-tree_grid <- grid_regular(cost_complexity(), tree_depth(), levels = 5)
-
-#tree_grid <- expand.grid(
-#  cost_complexity = c(0.00001, 0.0001, 0.001, 0.01, 0.1),
-#  tree_depth = c(1, 3, 5, 7, 10)
-#)
+tree_grid <- grid_regular(cost_complexity(), tree_depth(), levels = 10)
+tree_grid
 
 tree_wkf <- workflow() |>
   add_recipe(tree_rec) |>
   add_model(tree_mod)
+```
 
+### Fitting the Tree
+
+Now, we can apply the workflow and grid we just created to find the best tree. We are interested in mean log loss, so we use that as the metric when applying fits.
+
+```{r}
 tree_fits <- tree_wkf |> 
   tune_grid(resamples = cv_folds,
             grid = tree_grid,metrics = metric_set(mn_log_loss))
 
-tree_fits |>
-  collect_metrics()
+#tree_fits |> collect_metrics()
 
 
 tree_fits |>
   collect_metrics() |>
   filter(.metric == "mn_log_loss") |>
   arrange(mean)
+```
 
+### Best Tree Model
+
+Using `select_best()`, we can find the tree model with the lowest mn log loss. We then take this model and fit it to the entire training set. After fitting it to the entire training dataset, we predict on the test dataset to see what the final mn log loss is for this model.
+
+```{r}
 tree_best_params <- select_best(tree_fits, metric= "mn_log_loss")
 tree_best_params
 
@@ -80,20 +110,34 @@ tree_final_fit <- tree_final_wkf |>
 
 tree_final_fit |>
   collect_metrics()
+```
 
+Results look decent at best based on the mean log loss. Let's go ahead and look at the picture of this tree:
+
+### Final Tree Picture
+
+```{r}
 tree_final_fit |>
   extract_workflow() |>
   extract_fit_engine() |>
   rpart.plot::rpart.plot(roundint = FALSE, type = 2, extra = 104)
 ```
 
+Looks pretty complex. Some important variables I do see recurring in here are the GenHlth variable, the HighChol and HighBP variables, as well as smoking habits and age. It appears that we see a lot of subsetting around these very extreme categories, which makes sense. Alas, we still have one more model to test.
 
+## Random Forests
+
+With random forests, we will be using **the same recipe** as we did for the trees. This is an ensemble method used that is an extension of bagging (randomly selecting samples of data with replacement). The difference is that random forests do not use all predictors at each step! The random forest is incredibly flexible, and we should note that they are typically used for prediction rather than interpretation. These tend to be more accurate in predictions compared to the classification tree, but we do have to worry about overfitting, which we will determine in the testing set. More about the parameterizations below.
+
+### Parameterization of the Forest
+
+`mtry()` is the parameter that we allow tuning for, and it represents the number of variables that are random selected at each individual split. It is important that we allow a range of values here, such that the forest can be more or less complex depending what lowers the mean log loss metric. Note also, for runtime sake and also to keep consistent with the predictability of the classification tree, I have set the number of trees equal to 500 and the minimum n equal to 10. In the grid, I specify values 5 to 13, with 5 levels such that we can obtain 5,7,9,11, or 13 predictors at each split
 
 ```{r}
 rf_spec <- rand_forest(
   mtry = tune(),
-  min_n = 500,
-  trees = 200
+  min_n = 10,
+  trees = 500
 ) |>
  set_engine("ranger", importance = "impurity") |>
  set_mode("classification")
@@ -101,29 +145,35 @@ rf_spec <- rand_forest(
 rf_wkf <- workflow() |>
  add_recipe(tree_rec) |>
  add_model(rf_spec)
-```
 
-
-```{r}
 rf_grid <- grid_regular(
   mtry(range = c(5, 13)),
   levels = 5
 )
+rf_grid
+```
 
+### Fitting the Forest
+
+Now, we can apply the workflow and grid we just created to find the best tree. We are interested in mean log loss, so we use that as the metric when applying fits. This allows us to then collect metrics and find the best forest model.
+
+```{r}
 rf_fit <- rf_wkf |>
   tune_grid(
     resamples = cv_folds,
     grid = rf_grid,
     metrics = metric_set(mn_log_loss)
   )
-```
 
-```{r}
 rf_fit |>
  collect_metrics() |>
  filter(.metric == "mn_log_loss") |>
  arrange(mean)
 ```
+
+### Finding the Best Forest Model
+
+Using `select_best()`, we can find the forest model with the lowest mn log loss. We then take this model and fit it to the entire training set. After fitting it to the entire training dataset, we predict on the test to see what the final mn log loss is for this model.
 
 ```{r}
 rf_best_params <- select_best(rf_fit, metric = "mn_log_loss")
@@ -141,17 +191,18 @@ rf_final_fit |>
   collect_metrics()
 ```
 
-```{r}
-rf_full_fit <- rf_final_wkf |>
- fit(diabetes_final)
+This is **lower** than the classification tree!
 
-rf_final_model <- extract_fit_engine(rf_full_fit)
+### Final Forest Picture
+
+We can find the variable importances and see if any surprise us or pop out to us:
+
+```{r}
+rf_final_model <- extract_fit_engine(rf_final_fit)
 
 rf_imp <- tibble(term = names(importance(rf_final_model)),value = importance(rf_final_model)) |> arrange(desc(value))
 rf_imp
-```
 
-```{r}
 rf_imp |>
  mutate(term = factor(term, levels = term)) |>
  ggplot(aes(x = term, y = value)) +
@@ -159,3 +210,24 @@ rf_imp |>
  coord_flip()
 ```
 
+Oh wow! The GenHlth variable looks incredibly important. We see some other intuitively natural predictors pop up. The MentHlth and PhysHlth variables also look very important, which makes me feel very happy that I went through the trouble of mutating and playing around with them.
+
+## Better Model?
+
+From the lower mean log loss, we see that the **random forest is slightly better**. Winner winner chicken dinner, **we will now fit this to the entire dataset and continue on to the API section of this project.**
+
+The rule of thumb I am used to is that variables that do not have an importance score of \>100 we tend to remove, though I am noticing here that most variables appear to be relatively important? The age variables that dip below are redundant, but we do have Age_01 as one of our best predictors. I will decide to run the API with the full model. Plus, it gives users a chance to really customize their person of interest! Low customization is kind of boring.
+
+PS: Although it was particularly close, I did notice in my multiple runnings of multiple models that the forest tended to outperform it with most parameters used. It could just indicate that in this data, it tends to predict the binary response better!
+
+```{r}
+rf_full_fit <- rf_final_wkf |>
+ fit(diabetes_final)
+```
+
+Note that, here we are saving the best workflow and best fit to a .rds. This lets us easily run it in the API or any other program, since we save the runtime from creating and predicting on the very large dataset with our best model. We've already gone through the trouble of running it and picking it out, we might as well save it for ease of access!
+
+```{r}
+saveRDS(rf_final_wkf, file = "rf_final_wkf.rds")
+saveRDS(rf_full_fit, file = "rf_full_fit.rds")
+```

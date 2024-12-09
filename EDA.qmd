@@ -1,68 +1,103 @@
 ---
-title: "EDA"
-format: html
-editor: visual
+title: "EDA(Exploratory Data Analysis)"
+author: Robbie Ferrand
+toc: true
+toc-depth: 3
+toc-location: right
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: right
 ---
 
 ```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
+library(cowplot)
+library(scales)
 diabetes <- read.csv("diabetes_binary_health_indicators_BRFSS2015.csv")
 ```
 
 ## Introduction
 
--   briefly describe the data and variables we have to work with (in particular, the ones i will be prioritizing)
+Hello! Welcome to My (Robbie's) Final Project for ST558. The purpose of this project is to explore a [diabetes dataset, from Kaggle.](https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset) The dataset also has [a codebook, which can be found here](https://www.cdc.gov/brfss/annual_data/2015/pdf/codebook15_llcp.pdf).
 
-### All Variables and Levels
+This page takes the user through exploratory data analysis of the diabetes dataset, including data validation, distribution analysis, and determining an overall objective for the [Modeling Page](Modeling.html).
 
-https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset
-https://www.cdc.gov/brfss/annual_data/2015/pdf/codebook15_llcp.pdf
+### Variables Used in this Project
 
-Diabetes_binary: 0 if no diabetes, 1 if diabetes
+All of the variables can be found at the links above. Throughout the project, the creator decided to change objectives a few times, but the main objective was investigating relevant categorical variables of interest. Note that the creator has decided to exclude the BMI variable, which is the only numerical variable available.
 
-HighBP: 0 if not High Blood Pressure, 1 if High Blood Pressure
-HighChol: 0 if low, 1 if high
-CholCheck: 0 if not checked in 5 years, 1 if checked in 5 years
-Smoker: 0 if not smoked 5 packs of cigarettes, 1 if yes
-Stroke: 0 if no stroke, 1 if yes stroke
-HeartDiseaseorAttack: 0 if no heart disease/attack, 1 if yes 
-PhysActivity: 0 if no physical activity in last month, 1 if yes
-Fruits: 0 if no daily fruit, 1 if daily fruit
-Veggies: 0 if no daily vegetables, 1 if daily vegetables
-HvyAlcoholConsump: 0 if not heavy drinker, 1 if heavy drinker (>14 drinks men, >7 women)
-AnyHealthcare: 0 if no healthcare, 1 if healthcare
-NoDocbcCost: 0 if not cost-restricted for doctors, 1 if yes
-DiffWalk: 0 if no difficulty walking, 1 if yes
-Sex: 0 if female, 1 if male
+#### Response variable:
 
-GenHlth: 1-5 scale of overall health, 1 is excellent 5 is poor
-MentHlth: 1-30 scale of days with bad mental health.
-PhysHlth: 1-30 scale of days with bad physical health.
-Age:
-Education:
-Income:
+-   **Diabetes_binary:** 0 if no diabetes, 1 if diabetes
 
-BMI: numerical variable of bmi
+This is our variable of interest. We wish to see if we can predict if an individual has diabetes based on predictor variables.
 
+#### Predictor variables:
 
--   what is the purpose of my eda and the goal with modeling
+-   **HighBP(0,1):** 0 if individual does not have high blood pressure, 1 if individual does have high blood pressure
+
+-   **HighChol(0,1):** 0 if individual does not have high cholesterol, 1 if individual does have high cholesterol
+
+-   **Fruits(0,1):** 0 if individual does not consume fruit daily, 1 if individual does consume fruit daily
+
+-   **DiffWalk(0,1):** 0 if individual does not have trouble walking, 1 if individual does have difficulty walking
+
+-   **Smoker:** 0 if individual has not smoked 5 packs of cigarettes (100 cigarettes) in their lifetime, 1 if individual has smoked 5 packs of cigarettes (100 cigarettes) in their lifetime
+
+-   **CholCheck(0,1):** 0 if individual has not had their cholesterol levels checked in the last 5 years, 1 if individual has had their cholesterol levels checked in the last 5 years
+
+-   **HeartDiseaseorAttack(0,1):** 0 if individual does not have heart disease AND has not had a heart attack, 1 if individual has had either one or both
+
+-   **HvyAlcoholConsump(0,1):** 0 if individual is not a heavy drinker, 1 if individual is a heavy drinker (\>14 drinks men, \>7 women)
+
+-   **Sex(0,1):** 0 if individual is female, 1 if individual is male
+
+-   **Age(1-13):** This variable captures if a user is in one of the following age categories:\
+    1: 18-24, 2: 25-29, 3: 30-34, 4: 35-39, 5: 40-44, 6: 45-49, 7: 50-54,\
+    8: 55-59, 9: 60-64, 10: 65-69, 11: 70-75, 12: 75-59, 13: 80-99
+
+-   **GenHlth(1-5):** This variable captures a user's overall health:\
+    1: Excellent 2: Very Good 3: Good 4: Fair 5: Poor
+
+The following variables were modified by the creator to accentuate differences in distribution.
+
+-   **MentHlth(0-2):** scale of days with bad mental health.\
+    0: Individual experiences no mental health pain.\
+    1: Individual experiences some mental health pain in the last 30 days.\
+    2: Individual experiences mental health pain every day.
+
+-   **PhysHlth(0-2):** scale of days with bad physical health.\
+    0: Individual experiences no physical health pain.\
+    1: Individual experiences some physical health pain in the last 30 days.\
+    2: Individual experiences physical health pain every day.
 
 ## Exploratory Data Analysis
 
-### Validating the Data
+My general thought process for EDA is to first investigate if there are any missing values first. If so, then investigate those rows/columns. Second, I want to check the structures of the data and make sure they all make sense. Lastly, let's analyze some distributions of the individual categorical variables, and see if we can notice any cool trends. This will help us find an objective, and help us narrow down to some variables that we want to look at.
 
-In terms of exploratory data analysis, I always like to take the first step of exploring missing values:
+### Missing Values
 
 ```{r}
 (sum(is.na(diabetes)))
 ```
-Great! It looks like there are none. I think a natural next step would be to investigate all of the variables individually, and make sure their names are legible and their values are logical.
+
+Great! It looks like there are none. I think a natural next step would be to investigate all of the variables, and make sure their names are legible and their values are logical.
+
+### Variable Names
 
 ```{r}
 as_tibble(diabetes, width = Inf)
 ```
-Based on the given variable descriptions above, I believe that the variable names are rather sensical. However, it looks like the data was read in as entirely double and not as factors. Let's fix that first for the binary variables. Since the binary variables take values 0 for no and 1 for yes, I figure we can just leave them as is. Sex is assigned to female or male respectively.
 
+Based on the given variable descriptions above, I believe that the variable names are rather sensical. However, it looks like the data was read in as entirely double and not as factors.
+
+### Changing Data to Factors
+
+#### Binary
+
+First, let's start with all the variables that are binary. We can give Sex labels for ease of use, since the rest of them are just yes/no.
 
 ```{r}
 diabetes <- diabetes |>
@@ -71,11 +106,30 @@ diabetes <- diabetes |>
 str(diabetes)
 ```
 
-Similarly, we have other factors with multiple levels that need to be named and ordered. The names could matter later in analysis, and the same thing for the ordering.
+#### PhysHlth MentHlth
 
-For PhysHlth and MntlHlth, there were a few considerations. Treating this as a numerical variable possibly loses information between 0 days and 1 day. Furthermore, I wanted to account those who are in pain all of the time. That is why I have decided to transform the levels into 0 = "No Pain", 1 = "Some Pain", and 2 = "Everyday Pain".
+PhysHlth and MentHlth are very interesting variables. A quick peep into the future showed me their distributions:
 
-For the other variables, they are assigned with the labels provided in 
+```{r}
+#shoutout cowplot
+gg_phys <- ggplot(diabetes, aes(x = PhysHlth)) +
+  geom_histogram(bins = 10, fill = "salmon", color = "black") +
+  labs(title = "Physical Pain over Last 30 Days", x = "Days", y = "Frequency") +
+  theme_minimal()
+
+gg_ment <- ggplot(diabetes, aes(x = MentHlth)) +
+  geom_histogram(bins = 10, fill = "cyan", color = "black") +
+  labs(title = "Mental Pain over Last 30 Days", x = "Days", y = "Frequency") +
+  theme_minimal()
+
+plot_grid(gg_phys, gg_ment)
+```
+
+There are a few considerations that come to mind. Treating this as a numerical variable possibly loses information between 0 days and 1 day, since someone who is having no mental/physical pain is surely different than someone who is experiencing any sort of pain whatsoever. Furthermore, there is also a jump of individuals who are having pain all the time, which seems like another dichotic, important category. That is why I've decided to transform the variables into a 0,1,2 categorical ordered variable.
+
+#### Ordered Factors
+
+Next, We have other factors with multiple levels that need to be named and ordered. We will treat Age, GenHlth,Education, and Income as ordered factors since it follows the same trend as 1\<2\<..., etc.
 
 ```{r}
 diabetes <- diabetes |> 
@@ -91,34 +145,211 @@ mutate(PhysHlth = case_when(
     PhysHlth >= 1 & PhysHlth <= 29 ~ 1,
     PhysHlth == 30 ~ 2
   )) |>
-  mutate(PhysHlth = factor(PhysHlth,levels = c(0, 1, 2), labels = c("No Pain", "Pain", "Everyday Pain"),ordered = TRUE)) |>
+  mutate(PhysHlth = factor(PhysHlth,levels = c(0, 1, 2), labels = c("No Pain", "Some Pain", "Everyday Pain"),ordered = TRUE)) |>
   mutate(Age = factor(Age,levels = c(1:13), labels = c("18-24","25-29","30-34","35-39","40-44","45-49","50-54","55-59","60-64","65-69","70-74","75-79","80-99"),ordered = TRUE)) |>
   mutate(Education = factor(Education,levels = c(1:6), labels = c("NoSchool","Elementary","Some high school","High school graduate","Some college or technical school","College graduate"),ordered = TRUE)) |>
   mutate(Income = factor(Income,levels = c(1:8), labels = c("<$10,000","$10,000-$14,999","$15,000-$19,999","$20,000-$24,999","$25,000 - $34,999","$35,000 - $49,999","$50,000 - $74,999",">=$75,000"),ordered = TRUE))
 ```
+
+#### Final Checks
+
 Now, ALL of the data should be correctly formatted and validated!
 
 ```{r}
 str(diabetes)
 ```
 
+Looks good!
+
 ### Determining an Objective
+
+#### Attempt 1:
 
 Now that all of the data is correctly validated, we can determine which variables we are interested in looking at. I tend to like looking at more unexpected, or indirect routes to find relationships I wouldn't obviously expect. I believe that diet and the byproducts of a poor one will lead to a higher probability of diabetes. I'll approach this from a socioeconomic standpoint instead, plus a few extra variables that I am curious about.
 
-Variables of interest:
-Fruits, Veggies, AnyHealthCare, NoDocbcCost, GenHlth, MentHlth, PhysHlth, Sex, Age, Education, Income
+Variables of interest: AnyHealthCare, NoDocbcCost, GenHlth, MentHlth, PhysHlth, Sex, Age, Education, Income
 
 ```{r}
 diabetes_final <- diabetes |>
   select(c(Diabetes_binary, AnyHealthcare, NoDocbcCost, GenHlth, MentHlth, PhysHlth, Sex, Age, Education, Income))
 ```
-This means we have no numeric variables. I figure that, instead of looking at 12 different table() calls, it may be helpful to see barcharts.
 
+Reconsideration:
+
+Hello! This is Robbie from the future after conducting Modeling. The models were all terrible, and the false negative rate was like 99%! So I've decided to include some extra predictors that will hopefully help us out. I understand failure is part of the process, and maybe I should've stuck with it, but I want a worthwhile model!
+
+#### Final Objective
+
+There are a few scattered things I'd like to explore. I am only particularly interested in categorical variables, so bye bye BMI. Blood pressure and Cholesterol variables are natural choices. I included demographic variables(Sex,Age) to see if they had any worthwhile contributions alongside the health variables. I also wanted to see how my newly transformed MentHlth and PhysHlth variables were going to do. I also included random variables, like Fruits, DiffWalk, HvyAlcoholConsump to see if there was any importance from those whatsoever, because I am naive to their relationship with diabetes. The other variables included seemed like natural choices. This removes a total of 8 predictors from the original dataset, just to explore some of these particular relationships I am interested in.
+
+```{r}
+diabetes_final <- diabetes |>
+  select(c(Diabetes_binary, HighBP, HighChol, Fruits, DiffWalk, Smoker,CholCheck,HeartDiseaseorAttack, HvyAlcoholConsump, GenHlth, MentHlth, PhysHlth, Sex, Age))
+```
+
+### Distributions and Frequency
+
+Now that I've created a subset of predictors just based on interest (and to save me time!) Let's go ahead and analyze our predictors and determine if any others need to be changed or taken out. MentHlth and PhysHlth were modified "post-hoc" in a sense, since I had moved them up and transformed them there.
+
+#### Summaries
+
+The full summary of the data shows us the most common levels. This will be utilized some in the API when designing default values. We will look at these graphically in a second, but just so that we can get an idea of what our numbers look like:
+
+```{r}
+summary(diabetes_final)
+```
+
+And, we can also do this by class of Diabetes_binary,
+
+```{r}
+diabetes_final |>
+  group_by(Diabetes_binary) |>
+  summarise(across(1:8,
+      ~ paste0(unique(.), ": ", table(.)[as.character(unique(.))], collapse = "; "),
+      .names = "{.col}"
+    )
+  )
+```
+
+Where it's a bit more difficult to look at the variables that have multiple classes in comparison with the response variable. It looks cluttered, I figure we can get to that once we see distribution analysis! Note that, we pretty much see what we would expect. A lot of individuals that are high risk tend to be more prone for diabetes overall! Though, we'll get to that more when we fit our models.
+
+#### Response Variable
+
+```{r}
+ggplot(diabetes_final, aes(x = factor(Diabetes_binary), fill = factor(Diabetes_binary))) +
+  geom_bar(color = "black") +
+  labs(
+    title = "Prevelance of Diabetes",
+    x = "Diabetes (0 = No, 1 = Yes)",
+    y = "Frequency",
+    fill = "Diabetes_binary"
+  ) +
+  scale_fill_manual(values = c("0" = "darkblue", "1" = "yellow")) +
+  theme_minimal() +
+  scale_y_continuous(labels = comma) +
+  theme(axis.text.x = element_text(size = 12))
+```
+
+We notice here that it is much more likely for a random individual in this dataset to not have diabetes than to have diabetes. Generally, we then would expect our predictor variables that have an extreme dichotic nature from person to person to do the best.
+
+#### Binary Variables
+
+Let's create an ordered stacked bar plot so that we can look at the categorical variables better. Sure, we can make contingency tables, but I personally feel like this is nicer:
+
+```{r}
+binary_data_hist <- diabetes_final |>
+  select(c(HvyAlcoholConsump, HeartDiseaseorAttack, DiffWalk, HighChol, HighBP, Smoker, Fruits, CholCheck)) |>
+  pivot_longer(
+    cols = everything(), 
+    names_to = "Variable", 
+    values_to = "Response"
+  ) |>
+  group_by(Variable, Response) |>
+  summarise(Count = n(), .groups = "drop") |>
+  group_by(Variable) |>
+  mutate(Proportion = Count / sum(Count)) |>
+  mutate(Variable = factor(Variable, levels = c(
+    "HvyAlcoholConsump", "HeartDiseaseorAttack", "DiffWalk", 
+    "HighChol", "HighBP", "Smoker", "Fruits", "CholCheck"
+  )))
+
+ggplot(binary_data_hist, aes(x = Variable, y = Proportion, fill = factor(Response))) +
+  geom_bar(stat = "identity", position = "fill", color = "black") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(
+    title = "Binary Predictor Frequencies",
+    x = "Binary Variables(0 = No, 1 = Yes)",
+    y = "Proportion",
+    fill = "Response"
+  ) +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size =12)) 
+```
+
+viola! So, we notice that not a lot of people are heavy drinkers, even less so than those who have heart attacks. Interesting! The good thing that we see here is that there is a lot of dispersion, some variables tend to have a lot of no's, some are pretty equal, and CholCheck is very very high, with fruits also above the 50% margin.
+
+```{r}
+ggplot(diabetes_final, aes(x = factor(Sex), fill = factor(Sex))) +
+  geom_bar(color = "black") +
+  labs(
+    title = "Female/Male",
+    x = "Gender",
+    y = "Frequency",
+    fill = "Sex"
+  ) +
+  scale_fill_manual(values = c("Female" = "hotpink", "Male" = "blue")) +
+  scale_y_continuous(labels = comma) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 12))
+```
+
+Looking at Sex, we see that there are slightly more females in the dataset than males. I don't imagine this will cause any issues since the distributions are relatively similar, and close to the real world population as well.
+
+#### Ordered Predictors
+
+With these predictors, I figure it may be helpful to look at them individually.
+
+```{r}
+ggplot(diabetes_final, aes(x = factor(GenHlth), fill = factor(GenHlth))) +
+  geom_bar(color = "black") +
+  labs(
+    title = "General Health",
+    x = "Health Rating",
+    y = "Frequency",
+    fill = "GenHlth"
+  ) +
+  scale_fill_manual(values = c("Excellent" = "#FFB3BA", "Very Good" = "#FF6666", "Good" = "#FF0000", "Fair" = "#CC0000", "Poor" = "#990000")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 12))
+```
+
+In this case, we notice most individuals stick somewhere around the middle. Our natural intuition tells us that those towards the left of the graph (those in better health) are less likely to have diabetes.
+
+```{r}
+ggplot(diabetes_final, aes(x = factor(MentHlth), fill = factor(MentHlth))) +
+  geom_bar(color = "black") +
+  labs(
+    title = "Overall Mental Pain (Last 30 Days)",
+    x = "Occurence of Pain",
+    y = "Frequency",
+    fill = "MentHlth"
+  ) +
+  scale_fill_manual(values = c("No Pain" = "#A8E6A1", "Some Pain" = "#56B956", "Everyday Pain" = "#006400")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 12))
+```
+
+```{r}
+ggplot(diabetes_final, aes(x = factor(PhysHlth), fill = factor(PhysHlth))) +
+  geom_bar(color = "black") +
+  labs(
+    title = "Overall Physical Pain (Last 30 Days)",
+    x = "Occurence of Pain",
+    y = "Frequency",
+    fill = "PhysHlth"
+  ) +
+  scale_fill_manual(values = c("No Pain" = "#A2DFF7", "Some Pain" = "#4682B4", "Everyday Pain" = "#000080")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 12))
+```
+
+I like these graphs a lot better than the ones with 30 levels. We notice here that most individuals do not report any pain whatsoever, however there are a proportion of individuals who do report pain and I imagine that will be a pretty good predictor of diabetes rate.
+
+Out of curiosity, let's look at a contingency table for the two of these variables:
+
+```{r}
+ment_phys_table<- table(diabetes_final$MentHlth, diabetes_final$PhysHlth)
+rownames(ment_phys_table) <- c("No Mental Pain", "Some Mental Pain", "Everyday Mental Pain")
+colnames(ment_phys_table) <- c("No Physical Pain", "Some Physical Pain", "Everyday Physical Pain")
+ment_phys_table
+```
+
+This displays some interesting relationships between mental and physical pain! It's quite interesting to see that it's not always that those who are experiencing everyday physical pain are also experiencing everyday mental pain.
+
+**This ends the EDA! Lastly, we will be saving our final diabetes file to an R object for use in EDA as well as the API.r.**
 
 ```{r}
 saveRDS(diabetes_final, file = "diabetes_final.rds")
 ```
-
 
 [Click here for the Modeling Page](Modeling.html)
