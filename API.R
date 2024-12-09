@@ -1,4 +1,6 @@
-#API.R 
+#API.R
+#* @apiTitle Robbie's Diabetes API
+#* @apiDescription This API analyzes Diabetes data for completion of Project 3, ST558.
 
 suppressPackageStartupMessages({
 #load in necessary libraries
