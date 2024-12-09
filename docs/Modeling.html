@@ -166,7 +166,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">558</span>)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>diabetes_final <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="at">file =</span> <span class="st">"diabetes_final.rds"</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>diabetes_final <span class="ot">&lt;-</span> diabetes_final <span class="sc">|&gt;</span> <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">5000</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#diabetes_final &lt;- diabetes_final |&gt; slice_sample(n = 5000)</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>data_split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(diabetes_final, <span class="at">prop =</span> <span class="fl">0.70</span>)</span>
@@ -180,7 +180,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="classification-tree" class="level2">
 <h2 class="anchored" data-anchor-id="classification-tree">Classification Tree</h2>
-<p>The classification tree splits up predictor spaces into different regions, such that we can make different predictions based on the particular “region” of the data we are exploring. The region of prediction is made by the most common class in that specific region, and we are using it in this case to predict the binary (0,1) response variable of diabetes incidence. Important to note that this is one of the methods of supervised learning. More about the process and parameters below.</p>
+<p>The classification tree splits up predictor spaces into different regions, such that we can make different predictions based on the particular “region” of the data we are exploring. The region of prediction is made by the most common class in that specific region, and we are using it in this case to predict the binary (0,1) response variable of diabetes incidence. Classification trees do tend to be easier to visualize, which may be an advantage over the Random Forest. Important to note that this is one of the methods of supervised learning. More about the process and parameters below.</p>
 <section id="recipe" class="level3">
 <h3 class="anchored" data-anchor-id="recipe">Recipe</h3>
 <p>We first set up the recipe that we will be using for both the classification tree and the random forest. We have no numerical variables, so we are just concerned with making sure all of the categorical variables are “dummied”, or normalized such that we can correctly standardize them and their importance in the model.</p>
@@ -242,16 +242,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code># A tibble: 100 × 8
    cost_complexity tree_depth .metric     .estimator  mean     n std_err .config
              &lt;dbl&gt;      &lt;int&gt; &lt;chr&gt;       &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;  
- 1    0.0000000001          5 mn_log_loss binary     0.370     5  0.0152 Prepro…
- 2    0.000000001           5 mn_log_loss binary     0.370     5  0.0152 Prepro…
- 3    0.00000001            5 mn_log_loss binary     0.370     5  0.0152 Prepro…
- 4    0.0000001             5 mn_log_loss binary     0.370     5  0.0152 Prepro…
- 5    0.000001              5 mn_log_loss binary     0.370     5  0.0152 Prepro…
- 6    0.00001               5 mn_log_loss binary     0.370     5  0.0152 Prepro…
- 7    0.0001                5 mn_log_loss binary     0.370     5  0.0152 Prepro…
- 8    0.001                 5 mn_log_loss binary     0.370     5  0.0152 Prepro…
- 9    0.0000000001          4 mn_log_loss binary     0.380     5  0.0140 Prepro…
-10    0.000000001           4 mn_log_loss binary     0.380     5  0.0140 Prepro…
+ 1    0.0000000001          8 mn_log_loss binary     0.336     5 0.00134 Prepro…
+ 2    0.000000001           8 mn_log_loss binary     0.336     5 0.00134 Prepro…
+ 3    0.00000001            8 mn_log_loss binary     0.336     5 0.00134 Prepro…
+ 4    0.0000001             8 mn_log_loss binary     0.336     5 0.00134 Prepro…
+ 5    0.000001              8 mn_log_loss binary     0.336     5 0.00134 Prepro…
+ 6    0.00001               8 mn_log_loss binary     0.336     5 0.00134 Prepro…
+ 7    0.0000000001         10 mn_log_loss binary     0.339     5 0.00114 Prepro…
+ 8    0.000000001          10 mn_log_loss binary     0.339     5 0.00114 Prepro…
+ 9    0.00000001           10 mn_log_loss binary     0.339     5 0.00114 Prepro…
+10    0.0000001            10 mn_log_loss binary     0.339     5 0.00114 Prepro…
 # ℹ 90 more rows</code></pre>
 </div>
 </div>
@@ -266,7 +266,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code># A tibble: 1 × 3
   cost_complexity tree_depth .config               
             &lt;dbl&gt;      &lt;int&gt; &lt;chr&gt;                 
-1    0.0000000001          5 Preprocessor1_Model031</code></pre>
+1    0.0000000001          8 Preprocessor1_Model051</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#finalize model on training set</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>tree_final_wkf <span class="ot">&lt;-</span> tree_wkf <span class="sc">|&gt;</span></span>
@@ -282,7 +282,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code># A tibble: 1 × 4
   .metric     .estimator .estimate .config             
   &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;               
-1 mn_log_loss binary         0.355 Preprocessor1_Model1</code></pre>
+1 mn_log_loss binary         0.336 Preprocessor1_Model1</code></pre>
 </div>
 </div>
 <p>Results look decent at best based on the mean log loss. Let’s go ahead and look at the picture of this tree:</p>
@@ -294,6 +294,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extract_workflow</span>() <span class="sc">|&gt;</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extract_fit_engine</span>() <span class="sc">|&gt;</span></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  rpart.plot<span class="sc">::</span><span class="fu">rpart.plot</span>(<span class="at">roundint =</span> <span class="cn">FALSE</span>, <span class="at">type =</span> <span class="dv">2</span>, <span class="at">extra =</span> <span class="dv">104</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: labs do not fit even at cex 0.15, there may be some overplotting</code></pre>
+</div>
 <div class="cell-output-display">
 <p><img src="Modeling_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
 </div>
@@ -303,28 +306,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="random-forests" class="level2">
 <h2 class="anchored" data-anchor-id="random-forests">Random Forests</h2>
-<p>With random forests, we will be using <strong>the same recipe</strong> as we did for the trees. This is an ensemble method used that is an extension of bagging (randomly selecting samples of data with replacement). The difference is that random forests do not use all predictors at each step! The random forest is incredibly flexible, and we should note that they are typically used for prediction rather than interpretation. More about the parameterizations below.</p>
+<p>With random forests, we will be using <strong>the same recipe</strong> as we did for the trees. This is an ensemble method used that is an extension of bagging (randomly selecting samples of data with replacement). The difference is that random forests do not use all predictors at each step! The random forest is incredibly flexible, and we should note that they are typically used for prediction rather than interpretation. These tend to be more accurate in predictions compared to the classification tree, but we do have to worry about overfitting, which we will determine in the testing set. More about the parameterizations below.</p>
 <section id="parameterization-of-the-forest" class="level3">
 <h3 class="anchored" data-anchor-id="parameterization-of-the-forest">Parameterization of the Forest</h3>
 <p><code>mtry()</code> is the parameter that we allow tuning for, and it represents the number of variables that are random selected at each individual split. It is important that we allow a range of values here, such that the forest can be more or less complex depending what lowers the mean log loss metric. Note also, for runtime sake and also to keep consistent with the predictability of the classification tree, I have set the number of trees equal to 500 and the minimum n equal to 10. In the grid, I specify values 5 to 13, with 5 levels such that we can obtain 5,7,9,11, or 13 predictors at each split</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>rf_spec <span class="ot">&lt;-</span> <span class="fu">rand_forest</span>(</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">mtry =</span> <span class="fu">tune</span>(),</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">min_n =</span> <span class="dv">10</span>,</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">trees =</span> <span class="dv">500</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a> <span class="fu">set_engine</span>(<span class="st">"ranger"</span>, <span class="at">importance =</span> <span class="st">"impurity"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a> <span class="fu">set_mode</span>(<span class="st">"classification"</span>)</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>rf_wkf <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">|&gt;</span></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a> <span class="fu">add_recipe</span>(tree_rec) <span class="sc">|&gt;</span></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a> <span class="fu">add_model</span>(rf_spec)</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>rf_grid <span class="ot">&lt;-</span> <span class="fu">grid_regular</span>(</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mtry</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">13</span>)),</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="dv">5</span></span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>rf_grid</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>rf_spec <span class="ot">&lt;-</span> <span class="fu">rand_forest</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">mtry =</span> <span class="fu">tune</span>(),</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">min_n =</span> <span class="dv">10</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">trees =</span> <span class="dv">500</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a> <span class="fu">set_engine</span>(<span class="st">"ranger"</span>, <span class="at">importance =</span> <span class="st">"impurity"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a> <span class="fu">set_mode</span>(<span class="st">"classification"</span>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>rf_wkf <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">|&gt;</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a> <span class="fu">add_recipe</span>(tree_rec) <span class="sc">|&gt;</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a> <span class="fu">add_model</span>(rf_spec)</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>rf_grid <span class="ot">&lt;-</span> <span class="fu">grid_regular</span>(</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mtry</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">13</span>)),</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="dv">5</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>rf_grid</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 1
    mtry
@@ -341,26 +344,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="fitting-the-forest">Fitting the Forest</h3>
 <p>Now, we can apply the workflow and grid we just created to find the best tree. We are interested in mean log loss, so we use that as the metric when applying fits. This allows us to then collect metrics and find the best forest model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>rf_fit <span class="ot">&lt;-</span> rf_wkf <span class="sc">|&gt;</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tune_grid</span>(</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">resamples =</span> cv_folds,</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">grid =</span> rf_grid,</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">metrics =</span> <span class="fu">metric_set</span>(mn_log_loss)</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>rf_fit <span class="sc">|&gt;</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a> <span class="fu">collect_metrics</span>() <span class="sc">|&gt;</span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a> <span class="fu">filter</span>(.metric <span class="sc">==</span> <span class="st">"mn_log_loss"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a> <span class="fu">arrange</span>(mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>rf_fit <span class="ot">&lt;-</span> rf_wkf <span class="sc">|&gt;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tune_grid</span>(</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">resamples =</span> cv_folds,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">grid =</span> rf_grid,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">metrics =</span> <span class="fu">metric_set</span>(mn_log_loss)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>rf_fit <span class="sc">|&gt;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a> <span class="fu">collect_metrics</span>() <span class="sc">|&gt;</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a> <span class="fu">filter</span>(.metric <span class="sc">==</span> <span class="st">"mn_log_loss"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a> <span class="fu">arrange</span>(mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 7
    mtry .metric     .estimator  mean     n std_err .config             
   &lt;int&gt; &lt;chr&gt;       &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
-1     5 mn_log_loss binary     0.366     5  0.0132 Preprocessor1_Model1
-2     9 mn_log_loss binary     0.378     5  0.0133 Preprocessor1_Model3
-3     7 mn_log_loss binary     0.381     5  0.0143 Preprocessor1_Model2
-4    11 mn_log_loss binary     0.396     5  0.0209 Preprocessor1_Model4
-5    13 mn_log_loss binary     0.396     5  0.0223 Preprocessor1_Model5</code></pre>
+1     5 mn_log_loss binary     0.327     5 0.00149 Preprocessor1_Model1
+2     7 mn_log_loss binary     0.332     5 0.00164 Preprocessor1_Model2
+3     9 mn_log_loss binary     0.336     5 0.00179 Preprocessor1_Model3
+4    11 mn_log_loss binary     0.341     5 0.00192 Preprocessor1_Model4
+5    13 mn_log_loss binary     0.347     5 0.00231 Preprocessor1_Model5</code></pre>
 </div>
 </div>
 </section>
@@ -368,8 +371,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="finding-the-best-forest-model">Finding the Best Forest Model</h3>
 <p>Using <code>select_best()</code>, we can find the forest model with the lowest mn log loss. We then take this model and fit it to the entire training set. After fitting it to the entire training dataset, we predict on the test to see what the final mn log loss is for this model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>rf_best_params <span class="ot">&lt;-</span> <span class="fu">select_best</span>(rf_fit, <span class="at">metric =</span> <span class="st">"mn_log_loss"</span>)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>rf_best_params</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>rf_best_params <span class="ot">&lt;-</span> <span class="fu">select_best</span>(rf_fit, <span class="at">metric =</span> <span class="st">"mn_log_loss"</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>rf_best_params</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 2
    mtry .config             
@@ -378,19 +381,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>rf_final_wkf <span class="ot">&lt;-</span> rf_wkf <span class="sc">|&gt;</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">finalize_workflow</span>(rf_best_params)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>rf_final_fit <span class="ot">&lt;-</span> rf_final_wkf <span class="sc">|&gt;</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a> <span class="fu">last_fit</span>(data_split, <span class="at">metrics =</span> <span class="fu">metric_set</span>(mn_log_loss))</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>rf_final_fit <span class="sc">|&gt;</span></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>rf_final_wkf <span class="ot">&lt;-</span> rf_wkf <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">finalize_workflow</span>(rf_best_params)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>rf_final_fit <span class="ot">&lt;-</span> rf_final_wkf <span class="sc">|&gt;</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a> <span class="fu">last_fit</span>(data_split, <span class="at">metrics =</span> <span class="fu">metric_set</span>(mn_log_loss))</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>rf_final_fit <span class="sc">|&gt;</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 4
   .metric     .estimator .estimate .config             
   &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;               
-1 mn_log_loss binary         0.344 Preprocessor1_Model1</code></pre>
+1 mn_log_loss binary         0.328 Preprocessor1_Model1</code></pre>
 </div>
 </div>
 <p>This is <strong>lower</strong> than the classification tree!</p>
@@ -399,31 +402,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="final-forest-picture">Final Forest Picture</h3>
 <p>We can find the variable importances and see if any surprise us or pop out to us:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>rf_final_model <span class="ot">&lt;-</span> <span class="fu">extract_fit_engine</span>(rf_final_fit)</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>rf_imp <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">term =</span> <span class="fu">names</span>(<span class="fu">importance</span>(rf_final_model)),<span class="at">value =</span> <span class="fu">importance</span>(rf_final_model)) <span class="sc">|&gt;</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(value))</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>rf_imp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>rf_final_model <span class="ot">&lt;-</span> <span class="fu">extract_fit_engine</span>(rf_final_fit)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>rf_imp <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">term =</span> <span class="fu">names</span>(<span class="fu">importance</span>(rf_final_model)),<span class="at">value =</span> <span class="fu">importance</span>(rf_final_model)) <span class="sc">|&gt;</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(value))</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>rf_imp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 29 × 2
    term                    value
    &lt;chr&gt;                   &lt;dbl&gt;
- 1 GenHlth_1                42.0
- 2 HighBP_X1                31.2
- 3 HighChol_X1              26.0
- 4 DiffWalk_X1              22.5
- 5 GenHlth_3                19.4
- 6 HeartDiseaseorAttack_X1  18.2
- 7 Smoker_X1                17.9
- 8 Fruits_X1                17.8
- 9 PhysHlth_1               17.4
-10 MentHlth_1               17.1
+ 1 HighBP_X1               1573.
+ 2 GenHlth_1               1488.
+ 3 HighChol_X1              827.
+ 4 DiffWalk_X1              790.
+ 5 GenHlth_3                627.
+ 6 HeartDiseaseorAttack_X1  496.
+ 7 Age_01                   387.
+ 8 PhysHlth_1               386.
+ 9 GenHlth_4                364.
+10 MentHlth_1               314.
 # ℹ 19 more rows</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>rf_imp <span class="sc">|&gt;</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">mutate</span>(<span class="at">term =</span> <span class="fu">factor</span>(term, <span class="at">levels =</span> term)) <span class="sc">|&gt;</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> term, <span class="at">y =</span> value)) <span class="sc">+</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a> <span class="fu">geom_bar</span>(<span class="at">stat =</span><span class="st">"identity"</span>) <span class="sc">+</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a> <span class="fu">coord_flip</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>rf_imp <span class="sc">|&gt;</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">mutate</span>(<span class="at">term =</span> <span class="fu">factor</span>(term, <span class="at">levels =</span> term)) <span class="sc">|&gt;</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> term, <span class="at">y =</span> value)) <span class="sc">+</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a> <span class="fu">geom_bar</span>(<span class="at">stat =</span><span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a> <span class="fu">coord_flip</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="Modeling_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
 </div>
@@ -434,15 +437,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="better-model" class="level2">
 <h2 class="anchored" data-anchor-id="better-model">Better Model?</h2>
 <p>From the lower mean log loss, we see that the <strong>random forest is slightly better</strong>. Winner winner chicken dinner, <strong>we will now fit this to the entire dataset and continue on to the API section of this project.</strong></p>
+<p>The rule of thumb I am used to is that variables that do not have an importance score of &gt;100 we tend to remove, though I am noticing here that most variables appear to be relatively important? The age variables that dip below are redundant, but we do have Age_01 as one of our best predictors. I will decide to run the API with the full model. Plus, it gives users a chance to really customize their person of interest! Low customization is kind of boring.</p>
 <p>PS: Although it was particularly close, I did notice in my multiple runnings of multiple models that the forest tended to outperform it with most parameters used. It could just indicate that in this data, it tends to predict the binary response better!</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>rf_full_fit <span class="ot">&lt;-</span> rf_final_wkf <span class="sc">|&gt;</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">fit</span>(diabetes_final)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>rf_full_fit <span class="ot">&lt;-</span> rf_final_wkf <span class="sc">|&gt;</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">fit</span>(diabetes_final)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Note that, here we are saving the best workflow and best fit to a .rds. This lets us easily run it in the API or any other program, since we save the runtime from creating and predicting on the very large dataset with our best model. We’ve already gone through the trouble of running it and picking it out, we might as well save it for ease of access!</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">#saveRDS(rf_final_wkf, file = "rf_final_wkf.rds")</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="co">#saveRDS(rf_full_fit, file = "rf_full_fit.rds")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(rf_final_wkf, <span class="at">file =</span> <span class="st">"rf_final_wkf.rds"</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(rf_full_fit, <span class="at">file =</span> <span class="st">"rf_full_fit.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
